@@ -1,4 +1,4 @@
-package online.shashki.accounts;
+package com.workingbit.accounts;
 
 import com.amazonaws.serverless.exceptions.ContainerInitializationException;
 import com.amazonaws.serverless.proxy.internal.model.AwsProxyRequest;

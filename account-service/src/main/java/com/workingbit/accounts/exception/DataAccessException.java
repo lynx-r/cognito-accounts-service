@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package online.shashki.accounts.exception;
+package com.workingbit.accounts.exception;
 
 /**
  * This is the exception thrown when AWSCognitoDeveloperAuthenticationSample fails to retrieve data from AWS

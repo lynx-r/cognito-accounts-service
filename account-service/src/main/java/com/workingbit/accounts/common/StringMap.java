@@ -1,4 +1,4 @@
-package online.shashki.accounts.common;
+package com.workingbit.accounts.common;
 
 import java.util.*;
 

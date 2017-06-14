@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package online.shashki.accounts.exception;
+package com.workingbit.accounts.exception;
 
 /**
  * This is the exception thrown when one is not authorized to access a resource.

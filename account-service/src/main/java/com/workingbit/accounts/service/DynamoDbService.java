@@ -1,13 +1,12 @@
-package online.shashki.accounts.service;
+package com.workingbit.accounts.service;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
-import online.shashki.accounts.config.AwsProperties;
-import online.shashki.accounts.exception.DataAccessException;
+import com.workingbit.accounts.config.AwsProperties;
+import com.workingbit.accounts.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

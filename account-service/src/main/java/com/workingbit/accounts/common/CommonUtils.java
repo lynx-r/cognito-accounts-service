@@ -1,8 +1,7 @@
-package online.shashki.accounts.common;
+package com.workingbit.accounts.common;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.oltu.oauth2.common.utils.JSONUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
@@ -33,7 +32,17 @@ public class CommonUtils {
 		if (StringUtils.isEmpty(json))
 			return StringMap.emptyMap();
 
-		return StringMap.fromMap(JSONUtils.parseJSON(json));
+		Map<String, Object> map = new HashMap<>();
+		ObjectMapper mapper = new ObjectMapper();
+
+		try {
+			map = mapper.readValue(json, new TypeReference<HashMap<String, Object>>() {});
+			cleanseMap(map);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return StringMap.fromMap(map);
 	}
 
 	/**

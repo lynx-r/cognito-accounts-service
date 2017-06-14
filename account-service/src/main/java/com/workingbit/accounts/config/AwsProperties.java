@@ -1,4 +1,4 @@
-package online.shashki.accounts.config;
+package com.workingbit.accounts.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +78,10 @@ public class AwsProperties {
   private @Getter
   String attributeGivenName;
 
+  @Value("${ATTRIBUTE_FAMILY_NAME}")
+  private @Getter
+  String attributeFamilyName;
+
   @Value("${ATTRIBUTE_IDENTITY_ID}")
   private @Getter
   String attributeIdentityId;
@@ -86,16 +90,42 @@ public class AwsProperties {
   private @Getter
   String attributeEnabled;
 
-  @Value("${ATTRIBUTE_STATUS}")
+  @Value("${ATTRIBUTE_GENDER}")
   private @Getter
-  String attributeStatus;
+  String attributeGender;
+
+  @Value("${ATTRIBUTE_LOCALE}")
+  private @Getter
+  String attributeLocale;
+
+  @Value("${ATTRIBUTE_PICTURE}")
+  private @Getter
+  String attributePicture;
+
+  @Value("${ATTRIBUTE_BIRTHDAY}")
+  private @Getter
+  String attributeBirthday;
+
+
+  @Value("${STATUS}")
+  private @Getter
+  String status;
 
   private @Getter
   String statusOk = "ok";
 
-  @Value("${ATTRIBUTE_CONFIRMATION_CODE}")
   private @Getter
-  String attributeConfirmationCode;
+  String statusFail = "fail";
+
+  private @Getter
+  String statusMessage = "message";
+
+  private @Getter
+  String statusCode = "code";
+
+  @Value("${CONFIRMATION_CODE}")
+  private @Getter
+  String confirmationCode;
 
 
   @Value("${SESSION_TOKEN}")

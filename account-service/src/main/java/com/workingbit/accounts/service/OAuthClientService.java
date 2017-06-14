@@ -1,9 +1,9 @@
-package online.shashki.accounts.service;
+package com.workingbit.accounts.service;
 
 import com.amazonaws.util.StringUtils;
-import online.shashki.accounts.common.CommonUtils;
-import online.shashki.accounts.common.StringMap;
-import online.shashki.accounts.config.OAuthProperties;
+import com.workingbit.accounts.common.CommonUtils;
+import com.workingbit.accounts.config.OAuthProperties;
+import com.workingbit.accounts.common.StringMap;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
@@ -47,7 +47,7 @@ public class OAuthClientService {
     getProfilePicture(socialNetworkResponseMap, oAuthClient, accessToken);
 
     if (!CollectionUtils.isEmpty(socialNetworkResponseMap)) {
-      HashMap pictureHashMap = (HashMap) socialNetworkResponseMap.get("picture");
+      StringMap pictureHashMap = (StringMap) socialNetworkResponseMap.get("picture");
       String picture = "";
       if (null != pictureHashMap && !pictureHashMap.isEmpty()) {
         picture = (String) ((HashMap) pictureHashMap.get("data")).get("url");

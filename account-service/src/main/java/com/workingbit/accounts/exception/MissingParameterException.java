@@ -13,7 +13,7 @@
  * permissions and limitations under the License.
  */
 
-package online.shashki.accounts.exception;
+package com.workingbit.accounts.exception;
 
 public class MissingParameterException extends Exception {
 

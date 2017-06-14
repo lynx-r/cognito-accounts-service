@@ -1,4 +1,4 @@
-package online.shashki.accounts.config;
+package com.workingbit.accounts.config;
 
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
