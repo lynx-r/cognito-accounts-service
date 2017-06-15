@@ -105,7 +105,7 @@ public class CommonUtils {
 	 * Clear NULL and empty fields from MAP
 	 * @param map
 	 */
-	public static void cleanseMap(Map<String, Object> map) {
+	public static Map<String, Object> cleanseMap(Map<String, Object> map) {
 		Iterator<Map.Entry<String, Object>> iterator = map.entrySet().iterator();
 		List<String> keys = new ArrayList<String>();
 		while(iterator.hasNext()){
@@ -116,6 +116,7 @@ public class CommonUtils {
 		if(!keys.isEmpty())
 			for(String key : keys)
 				map.remove(key);
+		return map;
 	}
 
 

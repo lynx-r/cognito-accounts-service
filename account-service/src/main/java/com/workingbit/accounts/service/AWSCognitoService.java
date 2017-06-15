@@ -4,9 +4,11 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClient;
 import com.amazonaws.services.cognitoidp.model.*;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.workingbit.accounts.common.CommonUtils;
 import com.workingbit.accounts.common.StringMap;
 import com.workingbit.accounts.config.AwsProperties;
 import com.workingbit.accounts.config.OAuthProperties;
+import com.workingbit.accounts.exception.DataAccessException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +60,9 @@ public class AWSCognitoService {
     return createStatusOk("register.SIGN_UP");
   }
 
-  public StringMap registerFacebookUser(String accessToken)
+  public StringMap registerFacebookUser(String facebookAccessToken)
       throws Exception {
-    StringMap userDetailsFromFacebook = oAuthClientService.getUserDetailsFromFacebook(accessToken);
+    StringMap userDetailsFromFacebook = oAuthClientService.getUserDetailsFromFacebook(facebookAccessToken);
     return adminCreateUser(userDetailsFromFacebook);
   }
 
@@ -102,7 +104,7 @@ public class AWSCognitoService {
       return createStatusFail("authenticateUser.NEW_PASSWORD_REQUIRED");
     }
     AuthenticationResultType authenticationResult = adminInitiateAuthResult.getAuthenticationResult();
-    return getAuthenticationResult(username, authenticationResult);
+    return saveAuthenticationTokens(username, authenticationResult);
 
     // If you are authenticating your users through an identity provider
     // then you can set the Map of tokens in the request
@@ -155,23 +157,32 @@ public class AWSCognitoService {
 
     AdminRespondToAuthChallengeResult challengeResponse = awsCognitoIdentityProvider.adminRespondToAuthChallenge(finalRequest);
     if (StringUtils.isBlank(challengeResponse.getChallengeName())) {
-      return getAuthenticationResult(username, challengeResponse.getAuthenticationResult());
+      return saveAuthenticationTokens(username, challengeResponse.getAuthenticationResult());
     } else {
       throw new RuntimeException("unexpected challenge: " + challengeResponse.getChallengeName());
     }
   }
 
-  public StringMap authenticateFacebookUser(String accessToken) throws Exception {
-    GetUserRequest getUserRequest = new GetUserRequest()
-        .withAccessToken(accessToken);
-    GetUserResult user = awsCognitoIdentityProvider.getUser(getUserRequest);
+  public StringMap authenticateFacebookUser(String username, String accessToken) throws Exception {
+    GetUserResult user;
+    try {
+      GetUserRequest getUserRequest = new GetUserRequest()
+          .withAccessToken(accessToken);
+      user = awsCognitoIdentityProvider.getUser(getUserRequest);
+    } catch (Exception e) {
+      Map<String, AttributeValue> userFromDb = dynamoDbService.retrieveByUsername(username);
+      StringMap authTokens = refreshToken(username, userFromDb.get(awsProperties.getRefreshToken()).getS());
+      GetUserRequest getUserRequest = new GetUserRequest()
+          .withAccessToken(authTokens.getString(awsProperties.getUserAccessToken()));
+      user = awsCognitoIdentityProvider.getUser(getUserRequest);
+    }
 
     Map<String, AttributeValue> userFromDb = dynamoDbService.retrieveByUsername(user.getUsername());
     String password = userFromDb.get(awsProperties.getAttributePassword()).getS() + oAuthProperties.getTempPasswordSecret();
     return authenticateUser(user.getUsername(), password);
   }
 
-  public StringMap refreshToken(String username, String refreshToken) throws Exception {
+  private StringMap refreshToken(String username, String refreshToken) throws Exception {
     Map<String, String> authParameters = new HashMap<>();
     authParameters.put("REFRESH_TOKEN", refreshToken);
     authParameters.put("SECRET_HASH", getSecretHash(username));
@@ -181,7 +192,7 @@ public class AWSCognitoService {
         .withUserPoolId(awsProperties.getUserPoolId())
         .withAuthParameters(authParameters);
     AdminInitiateAuthResult adminInitiateAuthResult = awsCognitoIdentityProvider.adminInitiateAuth(adminInitiateAuthRequest);
-    return getAuthenticationResult(username, adminInitiateAuthResult.getAuthenticationResult());
+    return saveAuthenticationTokens(username, adminInitiateAuthResult.getAuthenticationResult());
   }
 
   public StringMap forgotPassword(String username) throws Exception {
@@ -193,13 +204,15 @@ public class AWSCognitoService {
     return createStatusOk("forgotPassword.SENT");
   }
 
-  public void confirmNewPassword(String username, String confirmation, String password) {
+  public StringMap confirmNewPassword(String username, String confirmation, String password) throws Exception {
     ConfirmForgotPasswordRequest confirmForgotPasswordRequest = new ConfirmForgotPasswordRequest()
-        .withClientId(awsProperties.getClientId())
+        .withClientId(awsProperties.getAppClientId())
         .withUsername(username)
         .withConfirmationCode(confirmation)
+        .withSecretHash(getSecretHash(username))
         .withPassword(password);
     awsCognitoIdentityProvider.confirmForgotPassword(confirmForgotPasswordRequest);
+    return createStatusOk("confirmNewPassword.CHANGED");
   }
 
   public StringMap adminResetUserPassword(String username) {
@@ -254,11 +267,14 @@ public class AWSCognitoService {
     return resp;
   }
 
-  private StringMap getAuthenticationResult(String username, AuthenticationResultType authenticationResult) {
+  private StringMap saveAuthenticationTokens(String username, AuthenticationResultType authenticationResult) throws DataAccessException {
+    Map<String, Object> authTokens = new HashMap<>();
+    authTokens.put(awsProperties.getUserAccessToken(), authenticationResult.getAccessToken());
+    authTokens.put(awsProperties.getUserIdToken(), authenticationResult.getIdToken());
+    dynamoDbService.storeUserWithAuthTokens(username, true, CommonUtils.cleanseMap(authTokens));
+
     StringMap resp = new StringMap();
-    resp.put(awsProperties.getUserAccessToken(), authenticationResult.getAccessToken());
-    resp.put(awsProperties.getRefreshToken(), authenticationResult.getRefreshToken());
-    resp.put(awsProperties.getUserIdToken(), authenticationResult.getIdToken());
+    resp.putAll(authTokens);
     resp.put(awsProperties.getAttributeUsername(), username);
     return resp;
   }

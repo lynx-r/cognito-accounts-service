@@ -10,9 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by Aleksey Popryaduhin on 20:11 10/06/2017.
@@ -45,11 +47,10 @@ public class DynamoDbService {
    * Store the username, password combination in the Identity table. The
    * username will represent the item name and the item will contain a
    * attributes password and userid.
-   * @param username
- *            Unique user identifier
+   *
+   * @param username   Unique user identifier
    * @param email
-   * @param identityId
-*          got from getId method
+   * @param identityId got from getId method
    */
   public void storeIdentityId(String username, String email, String identityId) throws DataAccessException {
     if (null == identityId) {
@@ -78,16 +79,46 @@ public class DynamoDbService {
       return;
     }
 
-    Map<String, AttributeValue> item = new HashMap<>();
-    item.put(awsProperties.getAttributeUid(), new AttributeValue().withS(username));
-    item.put(awsProperties.getAttributePassword(), new AttributeValue().withS(password));
-    item.put(awsProperties.getAttributeEnabled(), new AttributeValue().withS("true"));
+    Map<String, AttributeValue> key = new HashMap<>();
+    key.put(awsProperties.getAttributeUid(), new AttributeValue(username));
 
-    PutItemRequest putItemRequest = new PutItemRequest()
+    Map<String, AttributeValueUpdate> item = new HashMap<>();
+    item.put(awsProperties.getAttributePassword(), new AttributeValueUpdate().withValue(new AttributeValue(password)));
+    item.put(awsProperties.getAttributeEnabled(), new AttributeValueUpdate().withValue(new AttributeValue("true")));
+
+    UpdateItemRequest updateItemRequest = new UpdateItemRequest()
         .withTableName(awsProperties.getUserTable())
-        .withItem(item);
+        .withKey(key)
+        .withAttributeUpdates(item);
     try {
-      ddb.putItem(putItemRequest);
+      ddb.updateItem(updateItemRequest);
+    } catch (AmazonClientException e) {
+      throw new DataAccessException("Failed to store user: " + username, e);
+    }
+  }
+
+  public void storeUserWithAuthTokens(String username, boolean enabled, Map<String, Object> authTokens) throws DataAccessException {
+    if (StringUtils.isBlank(username)) {
+      return;
+    }
+
+    Map<String, AttributeValueUpdate> tokens = authTokens.entrySet()
+        .stream()
+        .map((e) -> (new HashMap.SimpleEntry<>(e.getKey(), new AttributeValueUpdate(new AttributeValue((String) e.getValue()), AttributeAction.PUT))))
+        .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+    Map<String, AttributeValueUpdate> item = new HashMap<>();
+    item.put(awsProperties.getAttributeEnabled(), new AttributeValueUpdate(new AttributeValue().withBOOL(enabled), AttributeAction.PUT));
+    item.putAll(tokens);
+
+    Map<String, AttributeValue> key = new HashMap<>();
+    key.put(awsProperties.getAttributeUid(), new AttributeValue().withS(username));
+
+    UpdateItemRequest updateItemRequest = new UpdateItemRequest()
+        .withTableName(awsProperties.getUserTable())
+        .withKey(key)
+        .withAttributeUpdates(item);
+    try {
+      ddb.updateItem(updateItemRequest);
     } catch (AmazonClientException e) {
       throw new DataAccessException("Failed to store user: " + username, e);
     }
@@ -137,8 +168,7 @@ public class DynamoDbService {
   /**
    * Checks to see if given tableName exist
    *
-   * @param tableName
-   *            The table name to check
+   * @param tableName The table name to check
    * @return true if tableName exist, false otherwise
    */
   protected boolean doesTableExist(String tableName) throws DataAccessException {

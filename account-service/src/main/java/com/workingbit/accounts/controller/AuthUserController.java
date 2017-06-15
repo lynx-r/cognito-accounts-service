@@ -71,6 +71,7 @@ public class AuthUserController {
   @PostMapping("/authenticateFacebookUser")
   public StringMap authenticateFacebookUser(@RequestBody StringMap credentials) throws Exception {
     return awsCognitoService.authenticateFacebookUser(
+        credentials.getString(awsProperties.getAttributeUsername()),
         credentials.getString(awsProperties.getUserAccessToken())
     );
   }
@@ -97,10 +98,12 @@ public class AuthUserController {
     );
   }
 
-  @PostMapping("/adminResetUserPassword")
-  public StringMap adminResetUserPassword(@RequestBody StringMap credentials) {
-    return awsCognitoService.adminResetUserPassword(
-        credentials.getString(awsProperties.getAttributeUsername())
+  @PostMapping("/confirmNewPassword")
+  public StringMap confirmNewPassword(@RequestBody StringMap credentials) throws Exception {
+    return awsCognitoService.confirmNewPassword(
+        credentials.getString(awsProperties.getAttributeUsername()),
+        credentials.getString(awsProperties.getConfirmationCode()),
+        credentials.getString(awsProperties.getAttributePassword())
     );
   }
 
@@ -109,22 +112,6 @@ public class AuthUserController {
     return awsCognitoService.authenticateUser(
         credentials.getString(awsProperties.getAttributeUsername()),
         credentials.getString(awsProperties.getAttributePassword()));
-  }
-
-  @PostMapping("/authenticateNewUser")
-  public StringMap authenticateNewUser(@RequestBody StringMap credentials) throws Exception {
-    return awsCognitoService.authenticateNewUser(
-        credentials.getString(awsProperties.getAttributeUsername()),
-        credentials.getString(awsProperties.getAttributePassword()),
-        credentials.getString("temporary_password"));
-  }
-
-  @PostMapping("/refreshToken")
-  public StringMap refreshToken(@RequestBody StringMap refreshToken) throws Exception {
-    return awsCognitoService.refreshToken(
-        refreshToken.getString(awsProperties.getAttributeUsername()),
-        refreshToken.getString(awsProperties.getRefreshToken())
-    );
   }
 
 //  @PostMapping("/assumeRoleWithWebIdentity")
