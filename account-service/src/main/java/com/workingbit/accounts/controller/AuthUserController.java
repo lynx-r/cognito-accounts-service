@@ -4,6 +4,7 @@ import com.workingbit.accounts.common.EnumRole;
 import com.workingbit.accounts.common.StringMap;
 import com.workingbit.accounts.config.AwsProperties;
 import com.workingbit.accounts.exception.DataAccessException;
+import com.workingbit.accounts.exception.UnauthorizedException;
 import com.workingbit.accounts.service.AWSCognitoService;
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
@@ -35,7 +36,8 @@ public class AuthUserController {
   }
 
   @PostMapping("/getCredentialsForIdentityFacebook")
-  public StringMap getCredentialsForIdentityFacebook(@RequestBody StringMap identityId) throws DataAccessException {
+  public StringMap getCredentialsForIdentityFacebook(@RequestBody StringMap identityId)
+      throws DataAccessException, OAuthSystemException, OAuthProblemException, IOException, UnauthorizedException {
     return awsCognitoService.getCredentialsForIdentityFacebook(
         identityId.getString(awsProperties.getFacebookAccessTokenName()),
         identityId.getString(awsProperties.getAttributeIdentityId()));

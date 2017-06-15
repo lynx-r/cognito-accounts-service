@@ -1,4 +1,4 @@
-package online.shashki;
+package com.workingbit.accounts;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

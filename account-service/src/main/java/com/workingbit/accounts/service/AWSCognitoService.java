@@ -1,32 +1,16 @@
 package com.workingbit.accounts.service;
 
-import com.amazonaws.auth.AWSSessionCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.AnonymousAWSCredentials;
-import com.amazonaws.auth.BasicSessionCredentials;
-import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentity;
-import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
-import com.amazonaws.services.cognitoidentity.model.*;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClient;
 import com.amazonaws.services.cognitoidp.model.*;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
-import com.amazonaws.services.securitytoken.model.AssumeRoleWithWebIdentityRequest;
-import com.amazonaws.services.securitytoken.model.AssumeRoleWithWebIdentityResult;
-import com.workingbit.accounts.common.EnumRole;
 import com.workingbit.accounts.common.StringMap;
-import com.workingbit.accounts.exception.DataAccessException;
 import com.workingbit.accounts.config.AwsProperties;
-import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
-import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.util.*;
 
 import static com.amazonaws.util.Base64.encodeAsString;
@@ -39,169 +23,13 @@ public class AWSCognitoService {
 
   private final AwsProperties awsProperties;
   private final AWSCognitoIdentityProvider awsCognitoIdentityProvider;
-  private final AmazonCognitoIdentity amazonCognitoIdentity;
-  private final DynamoDbService dynamoDbService;
-  private final OAuthClientService oAuthClientService;
 
   @Autowired
-  public AWSCognitoService(AwsProperties awsProperties,
-                           DynamoDbService dynamoDbService,
-                           OAuthClientService oAuthClientService) {
+  public AWSCognitoService(AwsProperties awsProperties) {
     this.awsProperties = awsProperties;
     this.awsCognitoIdentityProvider = AWSCognitoIdentityProviderClient.builder()
         .withRegion(awsProperties.getRegion())
         .build();
-    this.amazonCognitoIdentity = AmazonCognitoIdentityClient.builder()
-        .withRegion(awsProperties.getRegion())
-        .build();
-    this.dynamoDbService = dynamoDbService;
-    this.oAuthClientService = oAuthClientService;
-  }
-
-  /**
-   * send a get id request. This only needs to be executed the first time
-   * and the result should be cached.
-   *
-   * @param username
-   * @param logins
-   * @return
-   */
-  private String getIdentityId(String username, Map<String, String> logins) throws DataAccessException {
-    GetIdRequest idRequest = new GetIdRequest()
-        .withAccountId(awsProperties.getClientId())
-        .withIdentityPoolId(awsProperties.getIdentityPoolId())
-        .withLogins(logins);
-    // If you are authenticating your users through an identity provider
-    // then you can set the Map of tokens in the request
-    GetIdResult idResult = amazonCognitoIdentity.getId(idRequest);
-    String identityId = idResult.getIdentityId();
-    dynamoDbService.storeIdentityId(username, identityId);
-    return identityId;
-  }
-
-  public StringMap getId(String username, String facebookSessionKey) throws DataAccessException, OAuthSystemException, OAuthProblemException, IOException {
-    Map<String, String> providerTokens = new HashMap<>();
-    providerTokens.put(awsProperties.getFacebookProviderName(), facebookSessionKey);
-
-    StringMap userDetailsFromFacebook = oAuthClientService.getUserDetailsFromFacebook(facebookSessionKey);
-
-    adminCreateUser(username, userDetailsFromFacebook);
-
-    String email = (String) userDetailsFromFacebook.get(awsProperties.getAttributeEmail());
-    String identityId = getIdentityId(username, providerTokens);
-
-    StringMap resp = new StringMap();
-    resp.put(awsProperties.getAttributeIdentityId(), identityId);
-    return resp;
-  }
-
-  private void adminCreateUser(String username, StringMap userDetailsFromFacebook) {
-    List<AttributeType> userAttributes = new ArrayList<>();
-    userAttributes.add(new AttributeType()
-        .withName(awsProperties.getAttributeEmail())
-        .withValue(userDetailsFromFacebook.getString("email")));
-    userAttributes.add(new AttributeType()
-        .withName("email_verified")
-        .withValue("True"));
-    userAttributes.add(new AttributeType()
-        .withName(awsProperties.getAttributeGivenName())
-        .withValue(userDetailsFromFacebook.getString("first_name")));
-    userAttributes.add(new AttributeType()
-        .withName(awsProperties.getAttributeFamilyName())
-        .withValue(userDetailsFromFacebook.getString("last_name")));
-    userAttributes.add(new AttributeType()
-        .withName(awsProperties.getAttributeFamilyName())
-        .withValue(userDetailsFromFacebook.getString("gender")));
-    userAttributes.add(new AttributeType()
-        .withName(awsProperties.getAttributeLocale())
-        .withValue(userDetailsFromFacebook.getString("locale")));
-    userAttributes.add(new AttributeType()
-        .withName(awsProperties.getAttributePicture())
-        .withValue(userDetailsFromFacebook.getString("picture")));
-    userAttributes.add(new AttributeType()
-        .withName(awsProperties.getAttributeBirthday())
-        .withValue(userDetailsFromFacebook.getString("birthday")));
-    AdminCreateUserRequest adminCreateUserRequest = new AdminCreateUserRequest()
-        .withUsername(username)
-        .withUserPoolId(awsProperties.getUserPoolId())
-        .withDesiredDeliveryMediums("EMAIL")
-        .withUserAttributes(userAttributes);
-    awsCognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
-  }
-
-  private StringMap getCredentialsForIdentity(String identityId, Map<String, String> logins) throws DataAccessException {
-    // Create the request object
-    GetCredentialsForIdentityRequest tokenRequest = new GetCredentialsForIdentityRequest()
-        .withIdentityId(identityId)
-        // If you are authenticating your users through an identity provider
-        // then you can set the Map of tokens in the request
-        .withLogins(logins);
-
-    GetCredentialsForIdentityResult tokenResp = amazonCognitoIdentity.getCredentialsForIdentity(tokenRequest);
-    // get the OpenID token from the response
-    Credentials credentials = tokenResp.getCredentials();
-    // save the timeout for these credentials
-
-    StringMap resp = new StringMap();
-    resp.put(awsProperties.getSessionToken(), credentials.getSessionToken());
-    return resp;
-  }
-
-  public StringMap getCredentialsForIdentityFacebook(String facebookSessionKey, String identityId) throws DataAccessException {
-    Map<String, String> logins = new HashMap<>();
-    logins.put(awsProperties.getFacebookProviderName(), facebookSessionKey);
-    return getCredentialsForIdentity(identityId, logins);
-  }
-
-  public String getOpenIdToken(String username) throws DataAccessException {
-    String identityId = dynamoDbService.retrieveIdentityId(username);
-    // Create the request object
-    GetOpenIdTokenRequest tokenRequest = new GetOpenIdTokenRequest();
-    tokenRequest.setIdentityId(identityId);
-// If you are authenticating your users through an identity provider
-// then you can set the Map of tokens in the request
-// Map providerTokens = new HashMap();
-// providerTokens.put("graph.facebook.com", "facebook session key");
-// tokenRequest.setLogins(providerTokens);
-
-    GetOpenIdTokenResult tokenResp = amazonCognitoIdentity.getOpenIdToken(tokenRequest);
-// get the OpenID token from the response
-    return tokenResp.getToken();
-  }
-
-  public String assumeRoleWithWebIdentity(String openIdToken, EnumRole enumRole) {
-    AnonymousAWSCredentials anonymousAWSCredentials = new AnonymousAWSCredentials();
-    // you can now create a set of temporary, limited-privilege credentials to access
-// your AWS resources through the Security Token Service utilizing the OpenID
-// token returned by the previous API call. The IAM Role ARN passed to this call
-// will be applied to the temporary credentials returned
-    AWSSecurityTokenService stsClient = AWSSecurityTokenServiceClient.builder()
-        .withCredentials(new AWSStaticCredentialsProvider(anonymousAWSCredentials))
-        .build();
-    AssumeRoleWithWebIdentityRequest stsReq = new AssumeRoleWithWebIdentityRequest();
-    stsReq.setRoleArn(enumRole.getRoleArn());
-    stsReq.setWebIdentityToken(openIdToken);
-    stsReq.setRoleSessionName("AppTestSession");
-
-    AssumeRoleWithWebIdentityResult stsResp = stsClient.assumeRoleWithWebIdentity(stsReq);
-    com.amazonaws.services.securitytoken.model.Credentials stsCredentials = stsResp.getCredentials();
-
-// Create the session credentials object
-    AWSSessionCredentials sessionCredentials = new BasicSessionCredentials(
-        stsCredentials.getAccessKeyId(),
-        stsCredentials.getSecretAccessKey(),
-        stsCredentials.getSessionToken()
-    );
-// save the timeout for these credentials
-    Date sessionCredentialsExpiration = stsCredentials.getExpiration();
-    return sessionCredentials.getSessionToken();
-// these credentials can then be used to initialize other AWS clients,
-// for example the Amazon Cognito Sync client
-//    AmazonCognitoSync syncClient = new AmazonCognitoSyncClient(sessionCredentials);
-//    ListDatasetsRequest syncRequest = new ListDatasetsRequest();
-//    syncRequest.setIdentityId(idResp.getIdentityId());
-//    syncRequest.setIdentityPoolId("YOUR_COGNITO_IDENTITY_POOL_ID");
-//    ListDatasetsResult syncResp = syncClient.listDatasets(syncRequest);
   }
 
   public StringMap register(String username, String email, String password) throws Exception {
@@ -394,5 +222,39 @@ public class AWSCognitoService {
     resp.put(awsProperties.getRefreshToken(), authenticationResult.getRefreshToken());
     resp.put(awsProperties.getIdToken(), authenticationResult.getIdToken());
     return resp;
+  }
+
+  private void adminCreateUser(String username, StringMap userDetailsFromFacebook) {
+    List<AttributeType> userAttributes = new ArrayList<>();
+    userAttributes.add(new AttributeType()
+        .withName(awsProperties.getAttributeEmail())
+        .withValue(userDetailsFromFacebook.getString("email")));
+    userAttributes.add(new AttributeType()
+        .withName("email_verified")
+        .withValue("True"));
+    userAttributes.add(new AttributeType()
+        .withName(awsProperties.getAttributeGivenName())
+        .withValue(userDetailsFromFacebook.getString("first_name")));
+    userAttributes.add(new AttributeType()
+        .withName(awsProperties.getAttributeFamilyName())
+        .withValue(userDetailsFromFacebook.getString("last_name")));
+    userAttributes.add(new AttributeType()
+        .withName(awsProperties.getAttributeFamilyName())
+        .withValue(userDetailsFromFacebook.getString("gender")));
+    userAttributes.add(new AttributeType()
+        .withName(awsProperties.getAttributeLocale())
+        .withValue(userDetailsFromFacebook.getString("locale")));
+    userAttributes.add(new AttributeType()
+        .withName(awsProperties.getAttributePicture())
+        .withValue(userDetailsFromFacebook.getString("picture")));
+    userAttributes.add(new AttributeType()
+        .withName(awsProperties.getAttributeBirthday())
+        .withValue(userDetailsFromFacebook.getString("birthday")));
+    AdminCreateUserRequest adminCreateUserRequest = new AdminCreateUserRequest()
+        .withUsername(username)
+        .withUserPoolId(awsProperties.getUserPoolId())
+        .withDesiredDeliveryMediums("EMAIL")
+        .withUserAttributes(userAttributes);
+    awsCognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
   }
 }

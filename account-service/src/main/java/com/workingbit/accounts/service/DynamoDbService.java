@@ -8,6 +8,7 @@ import com.workingbit.accounts.config.AwsProperties;
 import com.workingbit.accounts.exception.DataAccessException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,19 +45,20 @@ public class DynamoDbService {
    * Store the username, password combination in the Identity table. The
    * username will represent the item name and the item will contain a
    * attributes password and userid.
-   * @param identityId
-   *          got from getId method
-   * @param email
+   * @param username
  *            Unique user identifier
+   * @param email
+   * @param identityId
+*          got from getId method
    */
-  public void storeIdentityId(String email, String identityId) throws DataAccessException {
+  public void storeIdentityId(String username, String email, String identityId) throws DataAccessException {
     if (null == identityId) {
       return;
     }
 
     Map<String, AttributeValue> item = new HashMap<>();
-    item.put(awsProperties.getAttributeUid(), new AttributeValue().withS(email));
-    item.put(awsProperties.getAttributeUsername(), new AttributeValue().withS(email));
+    item.put(awsProperties.getAttributeUid(), new AttributeValue().withS(username));
+    item.put(awsProperties.getAttributeUsername(), new AttributeValue().withS(username));
     item.put(awsProperties.getAttributeEmail(), new AttributeValue().withS(email));
     item.put(awsProperties.getAttributeIdentityId(), new AttributeValue().withS(identityId));
     item.put(awsProperties.getAttributeEnabled(), new AttributeValue().withS("true"));
@@ -67,17 +69,17 @@ public class DynamoDbService {
     try {
       ddb.putItem(putItemRequest);
     } catch (AmazonClientException e) {
-      throw new DataAccessException("Failed to store user: " + email, e);
+      throw new DataAccessException("Failed to store user: " + username, e);
     }
   }
 
-  public String retrieveIdentityId(String email) throws DataAccessException {
-    if (null == email) {
+  public String retrieveByUsername(String username) throws DataAccessException {
+    if (!StringUtils.hasText(username)) {
       return null;
     }
 
     Map<String, AttributeValue> item = new HashMap<>();
-    item.put(awsProperties.getAttributeUid(), new AttributeValue().withS(email));
+    item.put(awsProperties.getAttributeUid(), new AttributeValue().withS(username));
 
     GetItemRequest getItemRequest = new GetItemRequest()
         .withTableName(awsProperties.getUserTable())
@@ -87,10 +89,31 @@ public class DynamoDbService {
       GetItemResult result = ddb.getItem(getItemRequest);
       return result.getItem().get(awsProperties.getAttributeIdentityId()).getS();
     } catch (AmazonClientException e) {
-      throw new DataAccessException("Failed to store user: " + email, e);
+      throw new DataAccessException("Failed to store user: " + username, e);
     }
   }
 
+  public String retrieveByIdentityId(String identityId) throws DataAccessException {
+    if (!StringUtils.hasText(identityId)) {
+      return null;
+    }
+
+    Map<String, AttributeValue> item = new HashMap<>();
+    item.put(awsProperties.getAttributeIdentityId(), new AttributeValue().withS(identityId));
+
+    Map<String, AttributeValue> expressionAttributeValues = new HashMap<>();
+    expressionAttributeValues.put(":identityId", new AttributeValue(identityId));
+    ScanRequest getItemRequest = new ScanRequest()
+        .withTableName(awsProperties.getUserTable())
+        .withFilterExpression("identity_id = :identityId")
+        .withExpressionAttributeValues(expressionAttributeValues);
+    try {
+      ScanResult result = ddb.scan(getItemRequest);
+      return result.getItems().get(0).get(awsProperties.getAttributeUid()).getS();
+    } catch (AmazonClientException e) {
+      throw new DataAccessException("Failed to retrieve identityId: " + identityId, e);
+    }
+  }
 
   /**
    * Checks to see if given tableName exist
