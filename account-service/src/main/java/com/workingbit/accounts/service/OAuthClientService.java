@@ -1,9 +1,9 @@
 package com.workingbit.accounts.service;
 
-import com.amazonaws.util.StringUtils;
 import com.workingbit.accounts.common.CommonUtils;
-import com.workingbit.accounts.config.OAuthProperties;
 import com.workingbit.accounts.common.StringMap;
+import com.workingbit.accounts.config.OAuthProperties;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.oltu.oauth2.client.OAuthClient;
 import org.apache.oltu.oauth2.client.URLConnectionClient;
 import org.apache.oltu.oauth2.client.request.OAuthBearerClientRequest;
@@ -35,7 +35,7 @@ public class OAuthClientService {
   }
 
   public StringMap getUserDetailsFromFacebook(String accessToken) throws OAuthSystemException, OAuthProblemException, IOException {
-    if (StringUtils.isNullOrEmpty(accessToken)) {
+    if (StringUtils.isBlank(accessToken)) {
       throw new IllegalArgumentException("Invalid access token");
     }
 

@@ -6,9 +6,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.workingbit.accounts.config.AwsProperties;
 import com.workingbit.accounts.exception.DataAccessException;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,8 +73,28 @@ public class DynamoDbService {
     }
   }
 
-  public String retrieveByUsername(String username) throws DataAccessException {
-    if (!StringUtils.hasText(username)) {
+  public void storeUser(String username, String password) throws DataAccessException {
+    if (StringUtils.isBlank(username)) {
+      return;
+    }
+
+    Map<String, AttributeValue> item = new HashMap<>();
+    item.put(awsProperties.getAttributeUid(), new AttributeValue().withS(username));
+    item.put(awsProperties.getAttributePassword(), new AttributeValue().withS(password));
+    item.put(awsProperties.getAttributeEnabled(), new AttributeValue().withS("true"));
+
+    PutItemRequest putItemRequest = new PutItemRequest()
+        .withTableName(awsProperties.getUserTable())
+        .withItem(item);
+    try {
+      ddb.putItem(putItemRequest);
+    } catch (AmazonClientException e) {
+      throw new DataAccessException("Failed to store user: " + username, e);
+    }
+  }
+
+  public Map<String, AttributeValue> retrieveByUsername(String username) throws DataAccessException {
+    if (StringUtils.isBlank(username)) {
       return null;
     }
 
@@ -83,18 +103,17 @@ public class DynamoDbService {
 
     GetItemRequest getItemRequest = new GetItemRequest()
         .withTableName(awsProperties.getUserTable())
-        .withKey(item)
-        .withAttributesToGet(awsProperties.getAttributeIdentityId());
+        .withKey(item);
     try {
       GetItemResult result = ddb.getItem(getItemRequest);
-      return result.getItem().get(awsProperties.getAttributeIdentityId()).getS();
+      return result.getItem();
     } catch (AmazonClientException e) {
       throw new DataAccessException("Failed to store user: " + username, e);
     }
   }
 
   public String retrieveByIdentityId(String identityId) throws DataAccessException {
-    if (!StringUtils.hasText(identityId)) {
+    if (StringUtils.isNotBlank(identityId)) {
       return null;
     }
 

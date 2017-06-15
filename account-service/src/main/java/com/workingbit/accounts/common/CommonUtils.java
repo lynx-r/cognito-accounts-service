@@ -2,7 +2,7 @@ package com.workingbit.accounts.common;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -29,7 +29,7 @@ public class CommonUtils {
 	 */
 	public static StringMap convertJSONtoMap(String json, boolean addQueryData) {
 
-		if (StringUtils.isEmpty(json))
+		if (StringUtils.isBlank(json))
 			return StringMap.emptyMap();
 
 		Map<String, Object> map = new HashMap<>();
@@ -53,7 +53,7 @@ public class CommonUtils {
 	 */
 	public static List<Map<String, Object>> convertJSONtoList(String json) {
 
-		if (StringUtils.isEmpty(json))
+		if (StringUtils.isBlank(json))
 			return new ArrayList<>();
 
 		List<Map<String, Object>> list = new ArrayList<>();
@@ -121,7 +121,7 @@ public class CommonUtils {
 
 	public static int getUserAge(String birthday) {
 		int age = 0;
-		if (!StringUtils.isEmpty(birthday)) {
+		if (!StringUtils.isBlank(birthday)) {
 			final String[] birthdayArr = birthday.split("/");
 
 			final LocalDate now = LocalDate.now();

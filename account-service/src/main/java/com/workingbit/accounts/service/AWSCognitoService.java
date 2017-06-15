@@ -3,11 +3,14 @@ package com.workingbit.accounts.service;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClient;
 import com.amazonaws.services.cognitoidp.model.*;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.workingbit.accounts.common.StringMap;
 import com.workingbit.accounts.config.AwsProperties;
+import com.workingbit.accounts.config.OAuthProperties;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -22,14 +25,24 @@ import static com.amazonaws.util.Base64.encodeAsString;
 public class AWSCognitoService {
 
   private final AwsProperties awsProperties;
+  private final OAuthProperties oAuthProperties;
+  private final OAuthClientService oAuthClientService;
+  private final DynamoDbService dynamoDbService;
+
   private final AWSCognitoIdentityProvider awsCognitoIdentityProvider;
 
   @Autowired
-  public AWSCognitoService(AwsProperties awsProperties) {
+  public AWSCognitoService(AwsProperties awsProperties,
+                           OAuthProperties oAuthProperties,
+                           OAuthClientService oAuthClientService,
+                           DynamoDbService dynamoDbService) {
     this.awsProperties = awsProperties;
     this.awsCognitoIdentityProvider = AWSCognitoIdentityProviderClient.builder()
         .withRegion(awsProperties.getRegion())
         .build();
+    this.oAuthProperties = oAuthProperties;
+    this.oAuthClientService = oAuthClientService;
+    this.dynamoDbService = dynamoDbService;
   }
 
   public StringMap register(String username, String email, String password) throws Exception {
@@ -43,6 +56,12 @@ public class AWSCognitoService {
         .withUserAttributes(userAttributes);
     awsCognitoIdentityProvider.signUp(signUpRequest);
     return createStatusOk("register.SIGN_UP");
+  }
+
+  public StringMap registerFacebookUser(String accessToken)
+      throws Exception {
+    StringMap userDetailsFromFacebook = oAuthClientService.getUserDetailsFromFacebook(accessToken);
+    return adminCreateUser(userDetailsFromFacebook);
   }
 
   public StringMap confirmRegistration(String username, String confirmationCode) throws Exception {
@@ -65,7 +84,7 @@ public class AWSCognitoService {
   }
 
   public StringMap authenticateUser(String username, String password) throws Exception {
-    if (!StringUtils.hasText(username) || !StringUtils.hasText(password)) {
+    if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
       return createStatusFail("authenticateUser.INVALID_PARAMS");
     }
     Map<String, String> authParameters = new HashMap<>();
@@ -83,17 +102,25 @@ public class AWSCognitoService {
       return createStatusFail("authenticateUser.NEW_PASSWORD_REQUIRED");
     }
     AuthenticationResultType authenticationResult = adminInitiateAuthResult.getAuthenticationResult();
-    return getAuthenticationResult(authenticationResult);
+    return getAuthenticationResult(username, authenticationResult);
 
     // If you are authenticating your users through an identity provider
     // then you can set the Map of tokens in the request
 //    Map<String, String> logins = new HashMap<>();
-//    logins.put(awsProperties.getCognitoUserPoolName(), authenticationResult.getIdToken());
+//    logins.put(awsProperties.getCognitoUserPoolName(), authenticationResult.getUserIdToken());
 //    return getCredentialsForIdentity(getIdentityId(email, logins), logins);
   }
 
+  /**
+   * Set permanent password for a user and sign he up
+   * @param username
+   * @param password
+   * @param tempPassword
+   * @return AccessToke, IdToken, RefreshToken
+   * @throws Exception
+   */
   public StringMap authenticateNewUser(String username, String password, String tempPassword) throws Exception {
-    if (!StringUtils.hasText(username) || !StringUtils.hasText(tempPassword) || !StringUtils.hasText(password)) {
+    if (StringUtils.isBlank(username) || StringUtils.isBlank(tempPassword) || StringUtils.isBlank(password)) {
       return createStatusFail("authenticateNewUser.INVALID_PARAMS");
     }
 
@@ -127,23 +154,34 @@ public class AWSCognitoService {
         .withSession(initialResponse.getSession());
 
     AdminRespondToAuthChallengeResult challengeResponse = awsCognitoIdentityProvider.adminRespondToAuthChallenge(finalRequest);
-    if (!StringUtils.hasText(challengeResponse.getChallengeName())) {
-      return createStatusOk("authenticateNewUser.LOGGED_IN");
+    if (StringUtils.isBlank(challengeResponse.getChallengeName())) {
+      return getAuthenticationResult(username, challengeResponse.getAuthenticationResult());
     } else {
       throw new RuntimeException("unexpected challenge: " + challengeResponse.getChallengeName());
     }
   }
 
-  public StringMap refreshToken(String refreshToken) {
+  public StringMap authenticateFacebookUser(String accessToken) throws Exception {
+    GetUserRequest getUserRequest = new GetUserRequest()
+        .withAccessToken(accessToken);
+    GetUserResult user = awsCognitoIdentityProvider.getUser(getUserRequest);
+
+    Map<String, AttributeValue> userFromDb = dynamoDbService.retrieveByUsername(user.getUsername());
+    String password = userFromDb.get(awsProperties.getAttributePassword()).getS() + oAuthProperties.getTempPasswordSecret();
+    return authenticateUser(user.getUsername(), password);
+  }
+
+  public StringMap refreshToken(String username, String refreshToken) throws Exception {
     Map<String, String> authParameters = new HashMap<>();
     authParameters.put("REFRESH_TOKEN", refreshToken);
+    authParameters.put("SECRET_HASH", getSecretHash(username));
     AdminInitiateAuthRequest adminInitiateAuthRequest = new AdminInitiateAuthRequest()
         .withAuthFlow(AuthFlowType.REFRESH_TOKEN_AUTH)
-        .withClientId(awsProperties.getClientId())
+        .withClientId(awsProperties.getAppClientId())
         .withUserPoolId(awsProperties.getUserPoolId())
         .withAuthParameters(authParameters);
     AdminInitiateAuthResult adminInitiateAuthResult = awsCognitoIdentityProvider.adminInitiateAuth(adminInitiateAuthRequest);
-    return getAuthenticationResult(adminInitiateAuthResult.getAuthenticationResult());
+    return getAuthenticationResult(username, adminInitiateAuthResult.getAuthenticationResult());
   }
 
   public StringMap forgotPassword(String username) throws Exception {
@@ -216,15 +254,16 @@ public class AWSCognitoService {
     return resp;
   }
 
-  private StringMap getAuthenticationResult(AuthenticationResultType authenticationResult) {
+  private StringMap getAuthenticationResult(String username, AuthenticationResultType authenticationResult) {
     StringMap resp = new StringMap();
-    resp.put(awsProperties.getAccessToken(), authenticationResult.getAccessToken());
+    resp.put(awsProperties.getUserAccessToken(), authenticationResult.getAccessToken());
     resp.put(awsProperties.getRefreshToken(), authenticationResult.getRefreshToken());
-    resp.put(awsProperties.getIdToken(), authenticationResult.getIdToken());
+    resp.put(awsProperties.getUserIdToken(), authenticationResult.getIdToken());
+    resp.put(awsProperties.getAttributeUsername(), username);
     return resp;
   }
 
-  private void adminCreateUser(String username, StringMap userDetailsFromFacebook) {
+  private StringMap adminCreateUser(StringMap userDetailsFromFacebook) throws Exception {
     List<AttributeType> userAttributes = new ArrayList<>();
     userAttributes.add(new AttributeType()
         .withName(awsProperties.getAttributeEmail())
@@ -250,11 +289,18 @@ public class AWSCognitoService {
     userAttributes.add(new AttributeType()
         .withName(awsProperties.getAttributeBirthday())
         .withValue(userDetailsFromFacebook.getString("birthday")));
+    String email = userDetailsFromFacebook.getString("email");
+    String tempPassword = RandomStringUtils.random(90, oAuthProperties.getAsd());
     AdminCreateUserRequest adminCreateUserRequest = new AdminCreateUserRequest()
-        .withUsername(username)
+        .withUsername(email)
+        .withTemporaryPassword(tempPassword)
+        .withMessageAction(MessageActionType.SUPPRESS)
         .withUserPoolId(awsProperties.getUserPoolId())
-        .withDesiredDeliveryMediums("EMAIL")
         .withUserAttributes(userAttributes);
     awsCognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
+    dynamoDbService.storeUser(email, tempPassword);
+
+    String permPassword = tempPassword + oAuthProperties.getTempPasswordSecret();
+    return authenticateNewUser(email, permPassword, tempPassword);
   }
 }

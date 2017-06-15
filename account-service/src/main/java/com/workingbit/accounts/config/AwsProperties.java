@@ -128,21 +128,30 @@ public class AwsProperties {
   String confirmationCode;
 
 
-  @Value("${SESSION_TOKEN}")
+  @Value("${AWS_SESSION_TOKEN}")
   private @Getter
-  String sessionToken;
+  String awsSessionToken;
 
-  @Value("${ACCESS_TOKEN}")
+  @Value("${AWS_ACCESS_KEY_ID}")
   private @Getter
-  String accessToken;
+  String awsAccessKeyId;
 
-  @Value("${REFRESH_TOKEN}")
+  @Value("${AWS_SECRET_KEY}")
+  private @Getter
+  String awsSecretKey;
+
+
+  @Value("${USER_ACCESS_TOKEN}")
+  private @Getter
+  String userAccessToken;
+
+  @Value("${USER_REFRESH_TOKEN}")
   private @Getter
   String refreshToken;
 
-  @Value("${ID_TOKEN}")
+  @Value("${USER_ID_TOKEN}")
   private @Getter
-  String idToken;
+  String userIdToken;
 
 
   @Value("${FACEBOOK_PROVIDER_NAME}")

@@ -98,7 +98,7 @@ public class AmazonCognitoIdentityService {
   }
 
   public String getOpenIdToken(String username) throws DataAccessException {
-    String identityId = dynamoDbService.retrieveByUsername(username);
+    String identityId = dynamoDbService.retrieveByUsername(username).get(awsProperties.getAttributeIdentityId()).getS();
     // Create the request object
     GetOpenIdTokenRequest tokenRequest = new GetOpenIdTokenRequest();
     tokenRequest.setIdentityId(identityId);
@@ -163,7 +163,7 @@ public class AmazonCognitoIdentityService {
 
     // save the timeout for these credentials
     StringMap resp = new StringMap();
-    resp.put(awsProperties.getSessionToken(), credentials.getSessionToken());
+    resp.put(awsProperties.getAwsSessionToken(), credentials.getSessionToken());
 //    BasicAWSCredentials basicAWSCredentials = new BasicAWSCredentials(credentials.getAccessKeyId(), credentials.getSecretKey());
 //    AWSCredentialsProvider awsCredentialsProvider = new AWSStaticCredentialsProvider(basicAWSCredentials);
 //    AmazonApiGateway amazonApiGatewayClientBuilder = AmazonApiGatewayClientBuilder
