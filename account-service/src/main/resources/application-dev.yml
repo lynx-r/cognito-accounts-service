@@ -5,3 +5,5 @@ spring:
 
 logging.level:
   com.amazonaws.http.AmazonHttpClient: debug
+server:
+  port: 8888

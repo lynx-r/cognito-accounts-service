@@ -56,8 +56,12 @@ public class AWSCognitoService {
         .withUsername(username)
         .withPassword(password)
         .withUserAttributes(userAttributes);
-    awsCognitoIdentityProvider.signUp(signUpRequest);
-    return createStatusOk("register.SIGN_UP");
+    try {
+      awsCognitoIdentityProvider.signUp(signUpRequest);
+    } catch (InvalidParameterException e) {
+      return createStatusFail("register.FAIL", e.getErrorMessage());
+    }
+    return createStatusOk("register.CONFIRM_EMAIL", "Registration succeed. Confirmation code was sent on your email.");
   }
 
   public StringMap registerFacebookUser(String facebookAccessToken)
@@ -73,7 +77,7 @@ public class AWSCognitoService {
         .withSecretHash(getSecretHash(username))
         .withConfirmationCode(confirmationCode);
     awsCognitoIdentityProvider.confirmSignUp(confirmSignUpRequest);
-    return createStatusOk("confirmRegistration.CONFIRMED");
+    return createStatusOk("confirmRegistration.CONFIRMED", "Registration confirmed");
   }
 
   public StringMap resendCode(String username) throws Exception {
@@ -82,7 +86,7 @@ public class AWSCognitoService {
         .withSecretHash(getSecretHash(username))
         .withUsername(username);
     awsCognitoIdentityProvider.resendConfirmationCode(resendConfirmationCodeRequest);
-    return createStatusOk("resendCode.SENT");
+    return createStatusOk("resendCode.SENT", "Code resent");
   }
 
   public StringMap authenticateUser(String username, String password) throws Exception {
@@ -201,7 +205,7 @@ public class AWSCognitoService {
         .withUsername(username)
         .withSecretHash(getSecretHash(username));
     awsCognitoIdentityProvider.forgotPassword(forgotPasswordRequest);
-    return createStatusOk("forgotPassword.SENT");
+    return createStatusOk("forgotPassword.SENT", "Password reminded");
   }
 
   public StringMap confirmNewPassword(String username, String confirmation, String password) throws Exception {
@@ -212,7 +216,7 @@ public class AWSCognitoService {
         .withSecretHash(getSecretHash(username))
         .withPassword(password);
     awsCognitoIdentityProvider.confirmForgotPassword(confirmForgotPasswordRequest);
-    return createStatusOk("confirmNewPassword.CHANGED");
+    return createStatusOk("confirmNewPassword.CHANGED", "Password confirmed");
   }
 
   public StringMap adminResetUserPassword(String username) {
@@ -246,9 +250,11 @@ public class AWSCognitoService {
     return mac.doFinal(data);
   }
 
-  private StringMap createStatusOk(String message) {
+  private StringMap createStatusOk(String code, String message) {
     StringMap resp = new StringMap();
-    resp.put(awsProperties.getStatus(), message);
+    resp.put(awsProperties.getStatus(), awsProperties.getStatusOk());
+    resp.put(awsProperties.getStatusCode(), code);
+    resp.put(awsProperties.getStatusMessage(), message);
     return resp;
   }
 

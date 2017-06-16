@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="http://cdn.jsdelivr.net/webjars/bootstrap/3.3.6/css/bootstrap.min.css"
+          th:href="@{/webjars/bootstrap/3.3.6/css/bootstrap.min.css}"
+          rel="stylesheet" media="screen"/>
+    <link href="../static/css/core.css"
+          th:href="@{/css/core.css}"
+          rel="stylesheet" media="screen"/>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top" th:fragment="header">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">AWS Cognito Demo</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="#register">Register</a></li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
+    </div>
+</div>
+<div class="container">
+    <div id="register">
+        <h3>Register</h3>
+        <div class="row">
+            <form class="col-md-4" th:action="@{/register}" th:method="POST"
+                  th:content="'application/x-www-form-urlencoded'">
+                <div>
+                    <label for="username" class="control-label">Username</label>
+                    <input id="username" name="username" type="text" class="form-control"
+                           placeholder="Type your username…"/>
+                </div>
+                <div>
+                    <label for="email" class="control-label">Email</label>
+                    <input id="email" name="email" type="email" class="form-control"
+                           placeholder="Type your email…"/>
+                </div>
+                <div>
+                    <label for="password" class="control-label">Password</label>
+                    <input id="password" name="password" type="password" class="form-control"
+                           placeholder="Type your password…"/>
+                </div>
+                <div class="button-group pull-right">
+                    <button class="btn btn-primary">Register</button>
+                </div>
+            </form>
+            <form class="col-md-4" th:disabled="${register_STATE_STATUS}" th:action="@{/confirmPassword}"
+                  th:method="POST"
+                  th:content="'application/x-www-form-urlencoded'">
+                <div>
+                    <label for="usernameConfirm" class="control-label">Username</label>
+                    <input id="usernameConfirm" name="username" type="text" class="form-control"
+                           placeholder="Type your username…"/>
+                </div>
+                <div>
+                    <label for="confirmationCode" class="control-label">Confirmation Code</label>
+                    <input id="confirmationCode" name="confirmation_code" type="text" class="form-control"
+                           placeholder="Type confirmation code…"/>
+                </div>
+                <div class="button-group pull-right">
+                    <button class="btn btn-primary">Register</button>
+                </div>
+            </form>
+            <div class="col-md-4">
+                <div th:if="${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+                <div th:if="!${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="http://cdn.jsdelivr.net/webjars/jquery/2.2.1/jquery.min.js"
+        th:src="@{/webjars/jquery/2.2.1/jquery.min.js}"></script>
+<script th:src="@{/webjars/bootstrap/3.3.6/js/bootstrap.js}"></script>
+
+</body>
+</html>
