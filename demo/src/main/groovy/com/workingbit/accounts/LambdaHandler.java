@@ -13,7 +13,7 @@ public class LambdaHandler implements RequestHandler<AwsProxyRequest, AwsProxyRe
   private static SpringLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> getHandler() {
     if (null == handler) {
       try {
-        handler = SpringLambdaContainerHandler.getAwsProxyHandler(AccountServiceApplication.class);
+        handler = SpringLambdaContainerHandler.getAwsProxyHandler(DemoApplication.class);
       } catch (ContainerInitializationException e) {
         e.printStackTrace();
       }

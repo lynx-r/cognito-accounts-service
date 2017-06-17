@@ -1,9 +1,0 @@
-# Spring properties
-spring:
-  application:
-     name: accounts-service
-
-logging.level:
-  com.amazonaws.http.AmazonHttpClient: debug
-server:
-  port: 8888
