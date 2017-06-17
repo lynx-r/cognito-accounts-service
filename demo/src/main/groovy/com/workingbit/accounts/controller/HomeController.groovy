@@ -10,7 +10,9 @@ import org.apache.oltu.oauth2.common.OAuthProviderType
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException
 import org.apache.oltu.oauth2.common.message.types.GrantType
+import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.util.MultiValueMap
@@ -29,6 +31,7 @@ class HomeController {
 
     static final String HOST = 'http://localhost:8080'
     static final String AUTH_HOST = 'http://localhost:8888'
+    static final String TEST_HOST = 'http://localhost:9999'
     static final String USERS = '/users'
 
     static final String REGISTER = '/register'
@@ -55,7 +58,7 @@ class HomeController {
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
         prepareResp(result, redirectAttributes, 'reg')
-        return 'redirect:index'
+        return 'redirect:/'
     }
 
     @PostMapping(value = HomeController.CONFIRM_REGISTRATION, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -69,7 +72,7 @@ class HomeController {
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
         prepareResp(result, redirectAttributes, 'reg')
-        return 'redirect:index'
+        return 'redirect:/'
     }
 
     @PostMapping(value = HomeController.RESEND_CODE, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -82,7 +85,7 @@ class HomeController {
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
         prepareResp(result, redirectAttributes, 'reg')
-        return 'redirect:index'
+        return 'redirect:/'
     }
 
     @PostMapping(value = HomeController.AUTHENTICATE, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -96,7 +99,7 @@ class HomeController {
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
         prepareResp(result, redirectAttributes, 'auth')
-        return 'redirect:index'
+        return 'redirect:/'
     }
 
     @GetMapping('/loginCallback/reg')
@@ -134,7 +137,7 @@ class HomeController {
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
             prepareResp(result, redirectAttributes, 'fb_reg')
-            return 'redirect:index'
+            return 'redirect:/'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
             e.printStackTrace()
         }
@@ -173,8 +176,8 @@ class HomeController {
 
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
-            prepareResp(result, redirectAttributes, 'fb_auth')
-            return 'redirect:index'
+            prepareResp(result, redirectAttributes, 'fb_reg')
+            return 'redirect:/'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
             e.printStackTrace()
         }
@@ -183,15 +186,19 @@ class HomeController {
 
     @PostMapping(value = '/echo', consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     def echo(@RequestBody MultiValueMap data, RedirectAttributes redirectAttributes) {
-        final String uri = "${AUTH_HOST}${USERS}/echo"
+        final String uri = "${TEST_HOST}/test/echo?echo={echo}"
 
         Map<String, Object> params = new HashMap<>()
         params.put('echo', data.echo[0])
 
         RestTemplate restTemplate = new RestTemplate()
-        Map result = restTemplate.getForObject(uri, Map.class, params)
-        prepareResp(result, redirectAttributes, 'echo')
-        return 'redirect:index'
+        ResponseEntity result = restTemplate.exchange(uri, HttpMethod.GET, null, String.class, params)
+
+        redirectAttributes.addFlashAttribute('type', 'echo')
+        redirectAttributes.addFlashAttribute('register_STATE_STATUS', true)
+        redirectAttributes.addFlashAttribute('register_STATE_MESSAGE', "SUCCESS ${result.body}")
+
+        return 'redirect:/'
     }
 
     private static void prepareResp(Map result, RedirectAttributes redirectAttributes, String type) {

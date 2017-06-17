@@ -324,7 +324,6 @@ public class AWSCognitoService {
     authTokens.remove(awsProperties.getRefreshToken());
     StringMap resp = new StringMap();
     resp.putAll(authTokens);
-    resp.put(awsProperties.getAttributeUsername(), username);
     return resp;
   }
 

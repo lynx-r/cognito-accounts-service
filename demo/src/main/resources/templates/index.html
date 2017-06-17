@@ -142,26 +142,12 @@
                 <div>
                     <a th:href="${registerRedirect}">Register via Facebook</a>
                 </div>
-            </div>
-            <div th:hidden="${type ne 'fb_reg'}" class="col-md-4">
-                <div th:if="${register_STATE_STATUS}">
-                    <div th:text="${register_STATE_MESSAGE}"></div>
-                </div>
-                <div th:if="!${register_STATE_STATUS}">
-                    <div th:text="${register_STATE_MESSAGE}"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div id="loginOAuth2">
-        <div class="row">
-            <div class="col-md-4">
                 <h3>Login via OAuth2</h3>
                 <div>
                     <a th:href="${loginRedirect}">Login via Facebook</a>
                 </div>
             </div>
-            <div th:hidden="${type ne 'fb_auth'}" class="col-md-4">
+            <div th:hidden="${type ne 'fb_reg'}" class="col-md-4">
                 <div th:if="${register_STATE_STATUS}">
                     <div th:text="${register_STATE_MESSAGE}"></div>
                 </div>
@@ -184,7 +170,8 @@
                     </div>
                     <div class="form-group">
                         <label for="idToken" class="control-label">User IdToken</label>
-                        <input id="idToken" name="id_token" type="text" class="form-control" placeholder="User id token"/>
+                        <input id="idToken" name="id_token" type="text" class="form-control"
+                               placeholder="User id token"/>
                     </div>
                     <div class="button-group pull-right">
                         <button class="btn btn-primary">Echo</button>
