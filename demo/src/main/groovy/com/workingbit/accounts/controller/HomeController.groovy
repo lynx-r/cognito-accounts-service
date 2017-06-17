@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.client.RestTemplate
+import org.springframework.web.servlet.mvc.support.RedirectAttributes
 
 import javax.websocket.server.PathParam
 /**
@@ -43,7 +44,7 @@ class HomeController {
     }
 
     @PostMapping(value = HomeController.REGISTER, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    def register(@RequestBody MultiValueMap credentials, Model model) {
+    def register(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
         final String uri = "${AUTH_HOST}${USERS}${REGISTER}"
 
         Map<String, Object> params = new HashMap<>()
@@ -53,13 +54,12 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepareResp(result, model)
-        model.addAttribute('type', 'reg')
-        return 'index'
+        prepareResp(result, redirectAttributes, 'reg')
+        return 'redirect:index'
     }
 
     @PostMapping(value = HomeController.CONFIRM_REGISTRATION, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    def confirmRegistration(@RequestBody MultiValueMap credentials, Model model) {
+    def confirmRegistration(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
         final String uri = "${AUTH_HOST}${USERS}${HomeController.CONFIRM_REGISTRATION}"
 
         Map<String, Object> params = new HashMap<>()
@@ -68,13 +68,12 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepareResp(result, model)
-        model.addAttribute('type', 'reg')
-        return 'index'
+        prepareResp(result, redirectAttributes, 'reg')
+        return 'redirect:index'
     }
 
     @PostMapping(value = HomeController.RESEND_CODE, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    def resendConfirmationCode(@RequestBody MultiValueMap credentials, Model model) {
+    def resendConfirmationCode(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
         final String uri = "${AUTH_HOST}${USERS}${RESEND_CODE}"
 
         Map<String, Object> params = new HashMap<>()
@@ -82,13 +81,12 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepareResp(result, model)
-        model.addAttribute('type', 'reg')
-        return 'index'
+        prepareResp(result, redirectAttributes, 'reg')
+        return 'redirect:index'
     }
 
     @PostMapping(value = HomeController.AUTHENTICATE, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    def authenticate(@RequestBody MultiValueMap credentials, Model model) {
+    def authenticate(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
         final String uri = "${AUTH_HOST}${USERS}${AUTHENTICATE}"
 
         Map<String, Object> params = new HashMap<>()
@@ -97,13 +95,13 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepareResp(result, model)
-        model.addAttribute('type', 'auth')
-        return 'index'
+        prepareResp(result, redirectAttributes, 'auth')
+        return 'redirect:index'
     }
 
     @GetMapping('/loginCallback/reg')
-    String registerCallback(@PathParam('code') String code, @PathParam('state') String state, Model model) {
+    String registerCallback(@PathParam('code') String code, @PathParam('state') String state,
+                            RedirectAttributes redirectAttributes) {
         try {
             // CSRF Protection
             if (!'123'.equals(state)) {
@@ -135,9 +133,8 @@ class HomeController {
 
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
-            prepareResp(result, model)
-            model.addAttribute('type', 'fb_reg')
-            return 'index'
+            prepareResp(result, redirectAttributes, 'fb_reg')
+            return 'redirect:index'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
             e.printStackTrace()
         }
@@ -145,7 +142,8 @@ class HomeController {
     }
 
     @GetMapping('/loginCallback/login')
-    String loginCallback(@PathParam('code') String code, @PathParam('state') String state, Model model) {
+    String loginCallback(@PathParam('code') String code, @PathParam('state') String state,
+                         RedirectAttributes redirectAttributes) {
         try {
             // CSRF Protection
             if (null == code) {
@@ -175,9 +173,8 @@ class HomeController {
 
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
-            prepareResp(result, model)
-            model.addAttribute('type', 'fb_auth')
-            return 'index'
+            prepareResp(result, redirectAttributes, 'fb_auth')
+            return 'redirect:index'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
             e.printStackTrace()
         }
@@ -185,7 +182,7 @@ class HomeController {
     }
 
     @PostMapping(value = '/echo', consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    def echo(@RequestBody MultiValueMap data, Model model) {
+    def echo(@RequestBody MultiValueMap data, RedirectAttributes redirectAttributes) {
         final String uri = "${AUTH_HOST}${USERS}/echo"
 
         Map<String, Object> params = new HashMap<>()
@@ -193,18 +190,18 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.getForObject(uri, Map.class, params)
-        prepareResp(result, model)
-        model.addAttribute('type', 'echo')
-        return 'index'
+        prepareResp(result, redirectAttributes, 'echo')
+        return 'redirect:index'
     }
 
-    private static void prepareResp(Map result, Model model) {
+    private static void prepareResp(Map result, RedirectAttributes redirectAttributes, String type) {
+        redirectAttributes.addFlashAttribute('type', type)
         if (result.status == 'fail') {
-            model.addAttribute('register_STATE_STATUS', false)
-            model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
+            redirectAttributes.addFlashAttribute('register_STATE_STATUS', false)
+            redirectAttributes.addFlashAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
         } else {
-            model.addAttribute('register_STATE_STATUS', true)
-            model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
+            redirectAttributes.addFlashAttribute('register_STATE_STATUS', true)
+            redirectAttributes.addFlashAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
         }
     }
 
