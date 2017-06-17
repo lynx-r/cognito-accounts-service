@@ -53,7 +53,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepeareResp(result, model)
+        prepareResp(result, model)
         model.addAttribute('type', 'reg')
         return 'index'
     }
@@ -68,7 +68,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepeareResp(result, model)
+        prepareResp(result, model)
         model.addAttribute('type', 'reg')
         return 'index'
     }
@@ -82,7 +82,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepeareResp(result, model)
+        prepareResp(result, model)
         model.addAttribute('type', 'reg')
         return 'index'
     }
@@ -97,7 +97,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepeareResp(result, model)
+        prepareResp(result, model)
         model.addAttribute('type', 'auth')
         return 'index'
     }
@@ -135,7 +135,7 @@ class HomeController {
 
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
-            prepeareResp(result, model)
+            prepareResp(result, model)
             model.addAttribute('type', 'fb_reg')
             return 'index'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
@@ -175,7 +175,7 @@ class HomeController {
 
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
-            prepeareResp(result, model)
+            prepareResp(result, model)
             model.addAttribute('type', 'fb_auth')
             return 'index'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
@@ -192,13 +192,13 @@ class HomeController {
         params.put('echo', data.echo[0])
 
         RestTemplate restTemplate = new RestTemplate()
-        Map result = restTemplate.postForObject(uri, params, Map.class)
-        prepeareResp(result, model)
+        Map result = restTemplate.getForObject(uri, Map.class, params)
+        prepareResp(result, model)
         model.addAttribute('type', 'echo')
         return 'index'
     }
 
-    private static void prepeareResp(Map result, Model model) {
+    private static void prepareResp(Map result, Model model) {
         if (result.status == 'fail') {
             model.addAttribute('register_STATE_STATUS', false)
             model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")

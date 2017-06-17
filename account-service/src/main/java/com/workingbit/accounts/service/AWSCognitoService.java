@@ -185,20 +185,29 @@ public class AWSCognitoService {
     // retrieve user from db to get his tokens
     Map<String, AttributeValue> userFromDb = dynamoDbService.retrieveByUsername(username);
     GetUserRequest getUserRequest;
+    GetUserResult user;
     try {
       // get user by access token
       getUserRequest = new GetUserRequest()
           .withAccessToken(userFromDb.get(awsProperties.getUserAccessToken()).getS());
-    } catch (Exception e) {
+      user = awsCognitoIdentityProvider.getUser(getUserRequest);
+    } catch (NotAuthorizedException e) {
       // access token is expired. Acquire it using refresh token
-      StringMap authTokens = refreshToken(username, userFromDb.get(awsProperties.getRefreshToken()).getS());
+      StringMap authTokens;
+      try {
+        authTokens = refreshToken(username, userFromDb.get(awsProperties.getRefreshToken()).getS());
+      } catch (UserNotFoundException ex) {
+        return createStatusFail("authenticateFacebookUser.FAIL", ex.getErrorMessage());
+      }
       // get user using new access token
       getUserRequest = new GetUserRequest()
           .withAccessToken(authTokens.getString(awsProperties.getUserAccessToken()));
       // update user tokens
       dynamoDbService.storeUserWithAuthTokens(username, true, authTokens);
+      user = awsCognitoIdentityProvider.getUser(getUserRequest);
+    } catch (UserNotFoundException ex) {
+      return createStatusFail("authenticateFacebookUser.FAIL", ex.getErrorMessage());
     }
-    GetUserResult user = awsCognitoIdentityProvider.getUser(getUserRequest);
 
     // authenticate with stored password
     String password = userFromDb.get(awsProperties.getAttributePassword()).getS() + oAuthProperties.getTempPasswordSecret();
@@ -308,8 +317,11 @@ public class AWSCognitoService {
     Map<String, Object> authTokens = new HashMap<>();
     authTokens.put(awsProperties.getUserAccessToken(), authenticationResult.getAccessToken());
     authTokens.put(awsProperties.getUserIdToken(), authenticationResult.getIdToken());
+    authTokens.put(awsProperties.getRefreshToken(), authenticationResult.getRefreshToken());
     dynamoDbService.storeUserWithAuthTokens(username, true, CommonUtils.cleanseMap(authTokens));
 
+    // don't reveal refresh token to out
+    authTokens.remove(awsProperties.getRefreshToken());
     StringMap resp = new StringMap();
     resp.putAll(authTokens);
     resp.put(awsProperties.getAttributeUsername(), username);

@@ -1,6 +1,0 @@
-spring:
-  profiles.active: dev
-
-  thymeleaf.cache: false
-
-  resources.cache-period: 0

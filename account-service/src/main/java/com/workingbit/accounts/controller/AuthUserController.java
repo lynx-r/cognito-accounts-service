@@ -22,21 +22,6 @@ public class AuthUserController {
     this.awsProperties = awsProperties;
   }
 
-//  @PostMapping("/getId")
-//  public StringMap getId(@RequestBody StringMap credentials) throws DataAccessException, OAuthSystemException, OAuthProblemException, IOException {
-//    return awsCognitoService.getId(
-//        credentials.getString(awsProperties.getAttributeUsername()),
-//        credentials.getString(awsProperties.getFacebookAccessTokenName()));
-//  }
-//
-//  @PostMapping("/getCredentialsForIdentityFacebook")
-//  public StringMap getCredentialsForIdentityFacebook(@RequestBody StringMap identityId)
-//      throws DataAccessException, OAuthSystemException, OAuthProblemException, IOException, UnauthorizedException {
-//    return awsCognitoService.getCredentialsForIdentityFacebook(
-//        identityId.getString(awsProperties.getFacebookAccessTokenName()),
-//        identityId.getString(awsProperties.getAttributeIdentityId()));
-//  }
-
   @PostMapping("/register")
   public StringMap register(@RequestBody StringMap credentials) throws Exception {
     return awsCognitoService.register(
@@ -55,19 +40,6 @@ public class AuthUserController {
   @PostMapping("/registerFacebookUser")
   public StringMap registerFacebookUser(@RequestBody StringMap credentials) throws Exception {
     return awsCognitoService.registerFacebookUser(
-        credentials.getString(awsProperties.getFacebookAccessTokenName())
-    );
-  }
-
-  /**
-   * Register via Facebook
-   * @param credentials Facebook access token
-   * @return AccessToke, IdToken, RefreshToken
-   * @throws Exception
-   */
-  @PostMapping("/authenticateFacebookUser")
-  public StringMap authenticateFacebookUser(@RequestBody StringMap credentials) throws Exception {
-    return awsCognitoService.authenticateFacebookUser(
         credentials.getString(awsProperties.getFacebookAccessTokenName())
     );
   }
@@ -110,19 +82,16 @@ public class AuthUserController {
         credentials.getString(awsProperties.getAttributePassword()));
   }
 
-  @PostMapping("/echo")
-  public StringMap echo(@RequestBody StringMap echo) {
-    return awsCognitoService.echo(echo);
+  /**
+   * Register via Facebook
+   * @param credentials Facebook access token
+   * @return AccessToke, IdToken, RefreshToken
+   * @throws Exception
+   */
+  @PostMapping("/authenticateFacebookUser")
+  public StringMap authenticateFacebookUser(@RequestBody StringMap credentials) throws Exception {
+    return awsCognitoService.authenticateFacebookUser(
+        credentials.getString(awsProperties.getFacebookAccessTokenName())
+    );
   }
-
-  @GetMapping("/getEcho")
-  public StringMap getEcho(@RequestBody StringMap echo) {
-    return echo;
-  }
-
-//  @PostMapping("/assumeRoleWithWebIdentity")
-//  public String assumeRoleWithWebIdentity(@RequestParam("openIdToken") String openIdToken,
-//                                          @RequestParam("role") String role) {
-//    return awsCognitoService.assumeRoleWithWebIdentity(openIdToken, EnumRole.valueOf(role));
-//  }
 }
