@@ -53,13 +53,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        if (result.status == 'fail') {
-            model.addAttribute('register_STATE_STATUS', false)
-            model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
-        } else {
-            model.addAttribute('register_STATE_STATUS', true)
-            model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
-        }
+        prepeareResp(result, model)
         model.addAttribute('type', 'reg')
         return 'index'
     }
@@ -74,13 +68,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        if (result.status == 'fail') {
-            model.addAttribute('register_STATE_STATUS', false)
-            model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
-        } else {
-            model.addAttribute('register_STATE_STATUS', true)
-            model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
-        }
+        prepeareResp(result, model)
         model.addAttribute('type', 'reg')
         return 'index'
     }
@@ -94,13 +82,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        if (result.status == 'fail') {
-            model.addAttribute('register_STATE_STATUS', false)
-            model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
-        } else {
-            model.addAttribute('register_STATE_STATUS', true)
-            model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
-        }
+        prepeareResp(result, model)
         model.addAttribute('type', 'reg')
         return 'index'
     }
@@ -115,13 +97,7 @@ class HomeController {
 
         RestTemplate restTemplate = new RestTemplate()
         Map result = restTemplate.postForObject(uri, params, Map.class)
-        if (result.status == 'fail') {
-            model.addAttribute('register_STATE_STATUS', false)
-            model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
-        } else {
-            model.addAttribute('register_STATE_STATUS', true)
-            model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
-        }
+        prepeareResp(result, model)
         model.addAttribute('type', 'auth')
         return 'index'
     }
@@ -159,13 +135,7 @@ class HomeController {
 
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
-            if (result.status == 'fail') {
-                model.addAttribute('register_STATE_STATUS', false)
-                model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
-            } else {
-                model.addAttribute('register_STATE_STATUS', true)
-                model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
-            }
+            prepeareResp(result, model)
             model.addAttribute('type', 'fb_reg')
             return 'index'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
@@ -205,13 +175,7 @@ class HomeController {
 
             RestTemplate restTemplate = new RestTemplate()
             Map result = restTemplate.postForObject(uri, params, Map.class)
-            if (result.status == 'fail') {
-                model.addAttribute('register_STATE_STATUS', false)
-                model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
-            } else {
-                model.addAttribute('register_STATE_STATUS', true)
-                model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
-            }
+            prepeareResp(result, model)
             model.addAttribute('type', 'fb_auth')
             return 'index'
         } catch (OAuthProblemException | OAuthSystemException | IOException e) {
@@ -220,7 +184,31 @@ class HomeController {
         return 'index'
     }
 
-    static String loginRedirect(String typeAction) {
+    @PostMapping(value = '/echo', consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    def echo(@RequestBody MultiValueMap data, Model model) {
+        final String uri = "${AUTH_HOST}${USERS}/echo"
+
+        Map<String, Object> params = new HashMap<>()
+        params.put('echo', data.echo[0])
+
+        RestTemplate restTemplate = new RestTemplate()
+        Map result = restTemplate.postForObject(uri, params, Map.class)
+        prepeareResp(result, model)
+        model.addAttribute('type', 'echo')
+        return 'index'
+    }
+
+    private static void prepeareResp(Map result, Model model) {
+        if (result.status == 'fail') {
+            model.addAttribute('register_STATE_STATUS', false)
+            model.addAttribute('register_STATE_MESSAGE', "FAIL ${result.message}")
+        } else {
+            model.addAttribute('register_STATE_STATUS', true)
+            model.addAttribute('register_STATE_MESSAGE', "SUCCESS ${result.message}")
+        }
+    }
+
+    private static String loginRedirect(String typeAction) {
         try {
             OAuthClientRequest oAuthRequest = OAuthClientRequest
                     .authorizationProvider(OAuthProviderType.FACEBOOK)

@@ -171,6 +171,36 @@
             </div>
         </div>
     </div>
+    <hr/>
+    <div id="testRequest">
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Echo test</h3>
+                <form th:action="@{/echo}" th:method="POST"
+                      th:content="'application/x-www-form-urlencoded'">
+                    <div class="form-group">
+                        <label for="echo" class="control-label">Echo text</label>
+                        <input id="echo" name="echo" type="text" class="form-control" placeholder="Text to be echoed"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="idToken" class="control-label">User IdToken</label>
+                        <input id="idToken" name="id_token" type="text" class="form-control" placeholder="User id token"/>
+                    </div>
+                    <div class="button-group pull-right">
+                        <button class="btn btn-primary">Echo</button>
+                    </div>
+                </form>
+            </div>
+            <div th:hidden="${type ne 'echo'}" class="col-md-4">
+                <div th:if="${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+                <div th:if="!${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="http://cdn.jsdelivr.net/webjars/jquery/2.2.1/jquery.min.js"

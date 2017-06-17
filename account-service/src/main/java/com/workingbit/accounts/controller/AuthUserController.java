@@ -4,10 +4,7 @@ import com.workingbit.accounts.common.StringMap;
 import com.workingbit.accounts.config.AwsProperties;
 import com.workingbit.accounts.service.AWSCognitoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.core.MediaType;
 
@@ -111,6 +108,16 @@ public class AuthUserController {
     return awsCognitoService.authenticateUser(
         credentials.getString(awsProperties.getAttributeUsername()),
         credentials.getString(awsProperties.getAttributePassword()));
+  }
+
+  @PostMapping("/echo")
+  public StringMap echo(@RequestBody StringMap echo) {
+    return awsCognitoService.echo(echo);
+  }
+
+  @GetMapping("/getEcho")
+  public StringMap getEcho(@RequestBody StringMap echo) {
+    return echo;
   }
 
 //  @PostMapping("/assumeRoleWithWebIdentity")

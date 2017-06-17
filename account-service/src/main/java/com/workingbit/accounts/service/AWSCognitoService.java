@@ -253,6 +253,10 @@ public class AWSCognitoService {
     awsCognitoIdentityProvider.adminUserGlobalSignOut(adminUserGlobalSignOutRequest);
   }
 
+  public StringMap echo(StringMap echo) {
+    return createStatusOk("echo.SUCCESS", echo);
+  }
+
   private String getSecretHash(String username) throws Exception {
     String appClientId = awsProperties.getAppClientId(),
         appSecretKey = awsProperties.getAppClientSecret();
