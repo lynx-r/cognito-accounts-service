@@ -73,14 +73,16 @@ public class AWSCognitoService {
   public StringMap confirmRegistration(String username, String confirmationCode) throws Exception {
     ConfirmSignUpRequest confirmSignUpRequest = new ConfirmSignUpRequest()
         .withClientId(awsProperties.getAppClientId())
+        .withSecretHash(getSecretHash(username))
         .withUsername(username)
         .withSecretHash(getSecretHash(username))
         .withConfirmationCode(confirmationCode);
     try {
       awsCognitoIdentityProvider.confirmSignUp(confirmSignUpRequest);
+    } catch (UserNotFoundException e) {
+      return createStatusFail("confirmRegistration.FAIL", e.getErrorMessage());
     } catch (ExpiredCodeException e) {
       return createStatusFail("confirmRegistration.FAIL", e.getErrorMessage());
-
     }
     return createStatusOk("confirmRegistration.CONFIRMED", "Registration confirmed");
   }
