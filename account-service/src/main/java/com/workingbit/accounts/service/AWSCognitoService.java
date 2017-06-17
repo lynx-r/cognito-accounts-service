@@ -76,7 +76,12 @@ public class AWSCognitoService {
         .withUsername(username)
         .withSecretHash(getSecretHash(username))
         .withConfirmationCode(confirmationCode);
-    awsCognitoIdentityProvider.confirmSignUp(confirmSignUpRequest);
+    try {
+      awsCognitoIdentityProvider.confirmSignUp(confirmSignUpRequest);
+    } catch (ExpiredCodeException e) {
+      return createStatusFail("confirmRegistration.FAIL", e.getErrorMessage());
+
+    }
     return createStatusOk("confirmRegistration.CONFIRMED", "Registration confirmed");
   }
 
@@ -85,7 +90,11 @@ public class AWSCognitoService {
         .withClientId(awsProperties.getAppClientId())
         .withSecretHash(getSecretHash(username))
         .withUsername(username);
-    awsCognitoIdentityProvider.resendConfirmationCode(resendConfirmationCodeRequest);
+    try {
+      awsCognitoIdentityProvider.resendConfirmationCode(resendConfirmationCodeRequest);
+    } catch (InvalidParameterException e) {
+      return createStatusFail("resendCode.FAIL", e.getErrorMessage());
+    }
     return createStatusOk("resendCode.SENT", "Code resent");
   }
 
@@ -108,7 +117,7 @@ public class AWSCognitoService {
       return createStatusFail("authenticateUser.NEW_PASSWORD_REQUIRED");
     }
     AuthenticationResultType authenticationResult = adminInitiateAuthResult.getAuthenticationResult();
-    return saveAuthenticationTokens(username, authenticationResult);
+    return createStatusOk("authenticate.AUTHENTICATED", saveAuthenticationTokens(username, authenticationResult));
 
     // If you are authenticating your users through an identity provider
     // then you can set the Map of tokens in the request
@@ -119,6 +128,7 @@ public class AWSCognitoService {
 
   /**
    * Set permanent password for a user and sign he up
+   *
    * @param username
    * @param password
    * @param tempPassword
@@ -161,27 +171,36 @@ public class AWSCognitoService {
 
     AdminRespondToAuthChallengeResult challengeResponse = awsCognitoIdentityProvider.adminRespondToAuthChallenge(finalRequest);
     if (StringUtils.isBlank(challengeResponse.getChallengeName())) {
-      return saveAuthenticationTokens(username, challengeResponse.getAuthenticationResult());
+      return createStatusOk("authenticateNewUser.AUTHENTICATED",
+          saveAuthenticationTokens(username, challengeResponse.getAuthenticationResult()));
     } else {
       throw new RuntimeException("unexpected challenge: " + challengeResponse.getChallengeName());
     }
   }
 
-  public StringMap authenticateFacebookUser(String username, String accessToken) throws Exception {
-    GetUserResult user;
+  public StringMap authenticateFacebookUser(String facebookAccessToken) throws Exception {
+    // get user from Facebook by access_token
+    StringMap userFromFacebook = oAuthClientService.getUserDetailsFromFacebook(facebookAccessToken);
+    String username = userFromFacebook.getString(awsProperties.getAttributeEmail());
+    // retrieve user from db to get his tokens
+    Map<String, AttributeValue> userFromDb = dynamoDbService.retrieveByUsername(username);
+    GetUserRequest getUserRequest;
     try {
-      GetUserRequest getUserRequest = new GetUserRequest()
-          .withAccessToken(accessToken);
-      user = awsCognitoIdentityProvider.getUser(getUserRequest);
+      // get user by access token
+      getUserRequest = new GetUserRequest()
+          .withAccessToken(userFromDb.get(awsProperties.getUserAccessToken()).getS());
     } catch (Exception e) {
-      Map<String, AttributeValue> userFromDb = dynamoDbService.retrieveByUsername(username);
+      // access token is expired. Acquire it using refresh token
       StringMap authTokens = refreshToken(username, userFromDb.get(awsProperties.getRefreshToken()).getS());
-      GetUserRequest getUserRequest = new GetUserRequest()
+      // get user using new access token
+      getUserRequest = new GetUserRequest()
           .withAccessToken(authTokens.getString(awsProperties.getUserAccessToken()));
-      user = awsCognitoIdentityProvider.getUser(getUserRequest);
+      // update user tokens
+      dynamoDbService.storeUserWithAuthTokens(username, true, authTokens);
     }
+    GetUserResult user = awsCognitoIdentityProvider.getUser(getUserRequest);
 
-    Map<String, AttributeValue> userFromDb = dynamoDbService.retrieveByUsername(user.getUsername());
+    // authenticate with stored password
     String password = userFromDb.get(awsProperties.getAttributePassword()).getS() + oAuthProperties.getTempPasswordSecret();
     return authenticateUser(user.getUsername(), password);
   }
@@ -258,6 +277,14 @@ public class AWSCognitoService {
     return resp;
   }
 
+  private StringMap createStatusOk(String code, StringMap data) {
+    StringMap resp = new StringMap();
+    resp.put(awsProperties.getStatus(), awsProperties.getStatusOk());
+    resp.put(awsProperties.getStatusCode(), code);
+    resp.put(awsProperties.getStatusMessage(), CommonUtils.convertMapToJSON(data));
+    return resp;
+  }
+
   private StringMap createStatusFail(String message) {
     StringMap resp = new StringMap();
     resp.put(awsProperties.getStatus(), awsProperties.getStatusFail());
@@ -319,7 +346,11 @@ public class AWSCognitoService {
         .withMessageAction(MessageActionType.SUPPRESS)
         .withUserPoolId(awsProperties.getUserPoolId())
         .withUserAttributes(userAttributes);
-    awsCognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
+    try {
+      awsCognitoIdentityProvider.adminCreateUser(adminCreateUserRequest);
+    } catch (UsernameExistsException e) {
+      return createStatusFail("adminCreateUser.FAIL", e.getErrorMessage());
+    }
     dynamoDbService.storeUser(email, tempPassword);
 
     String permPassword = tempPassword + oAuthProperties.getTempPasswordSecret();

@@ -32,47 +32,136 @@
 </div>
 <div class="container">
     <div id="register">
-        <h3>Register</h3>
         <div class="row">
-            <form class="col-md-4" th:action="@{/register}" th:method="POST"
-                  th:content="'application/x-www-form-urlencoded'">
-                <div>
-                    <label for="username" class="control-label">Username</label>
-                    <input id="username" name="username" type="text" class="form-control"
-                           placeholder="Type your username…"/>
-                </div>
-                <div>
-                    <label for="email" class="control-label">Email</label>
-                    <input id="email" name="email" type="email" class="form-control"
-                           placeholder="Type your email…"/>
-                </div>
-                <div>
-                    <label for="password" class="control-label">Password</label>
-                    <input id="password" name="password" type="password" class="form-control"
-                           placeholder="Type your password…"/>
-                </div>
-                <div class="button-group pull-right">
-                    <button class="btn btn-primary">Register</button>
-                </div>
-            </form>
-            <form class="col-md-4" th:disabled="${register_STATE_STATUS}" th:action="@{/confirmPassword}"
-                  th:method="POST"
-                  th:content="'application/x-www-form-urlencoded'">
-                <div>
-                    <label for="usernameConfirm" class="control-label">Username</label>
-                    <input id="usernameConfirm" name="username" type="text" class="form-control"
-                           placeholder="Type your username…"/>
-                </div>
-                <div>
-                    <label for="confirmationCode" class="control-label">Confirmation Code</label>
-                    <input id="confirmationCode" name="confirmation_code" type="text" class="form-control"
-                           placeholder="Type confirmation code…"/>
-                </div>
-                <div class="button-group pull-right">
-                    <button class="btn btn-primary">Register</button>
-                </div>
-            </form>
             <div class="col-md-4">
+                <h3>Register</h3>
+                <form th:action="@{/register}" th:method="POST"
+                      th:content="'application/x-www-form-urlencoded'">
+                    <div class="form-group">
+                        <label for="username" class="control-label">Username</label>
+                        <input id="username" name="username" type="text" class="form-control"
+                               placeholder="Type your username…"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="control-label">Email</label>
+                        <input id="email" name="email" type="email" class="form-control"
+                               placeholder="Type your email…"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="control-label">Password</label>
+                        <input id="password" name="password" type="password" class="form-control"
+                               placeholder="Type your password…"/>
+                    </div>
+                    <div class="button-group pull-right">
+                        <button class="btn btn-primary">Register</button>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-4">
+                <h3>Confirm Registration</h3>
+                <form th:action="@{/confirmRegistration}"
+                      th:method="POST"
+                      th:content="'application/x-www-form-urlencoded'"
+                >
+                    <div class="form-group">
+                        <label for="usernameConfirm" class="control-label">Username</label>
+                        <input id="usernameConfirm" name="username" type="text" class="form-control"
+                               placeholder="Type your username…"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmationCode" class="control-label">Confirmation Code</label>
+                        <input id="confirmationCode" name="confirmation_code" type="text" class="form-control"
+                               placeholder="Type confirmation code…"/>
+                    </div>
+                    <div class="button-group overflow-hidden">
+                        <button class="btn btn-primary pull-right">Confirm Registration</button>
+                    </div>
+                </form>
+                <h3>Resend Confirmation Code</h3>
+                <form th:action="@{/resendCode}"
+                      th:method="POST"
+                      class="margin-top10"
+                      th:content="'application/x-www-form-urlencoded'">
+                    <div class="form-group">
+                        <label for="usernameConfirm" class="control-label">Username</label>
+                        <input id="usernameResendConfirm" name="username" type="text" class="form-control"
+                               placeholder="Type your username…"/>
+                    </div>
+                    <div class="button-group pull-right">
+                        <button class="btn btn-primary">Resend Confirmation Code</button>
+                    </div>
+                </form>
+            </div>
+            <div th:hidden="${type ne 'reg'}" class="col-md-4">
+                <div th:if="${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+                <div th:if="!${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <div id="authenticate">
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Authenticate</h3>
+                <form th:action="@{/authenticate}" th:method="POST"
+                      th:content="'application/x-www-form-urlencoded'">
+                    <div class="form-group">
+                        <label for="usernameAuth" class="control-label">Username</label>
+                        <input id="usernameAuth" name="username" type="text" class="form-control"
+                               placeholder="Type your username…"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="passwordAuth" class="control-label">Password</label>
+                        <input id="passwordAuth" name="password" type="password" class="form-control"
+                               placeholder="Type your password…"/>
+                    </div>
+                    <div class="button-group pull-right">
+                        <button class="btn btn-primary">Authenticate</button>
+                    </div>
+                </form>
+            </div>
+            <div th:hidden="${type ne 'auth'}" class="col-md-4">
+                <div th:if="${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+                <div th:if="!${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    <div id="regOAuth2">
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Register via OAuth2</h3>
+                <div>
+                    <a th:href="${registerRedirect}">Register via Facebook</a>
+                </div>
+            </div>
+            <div th:hidden="${type ne 'fb_reg'}" class="col-md-4">
+                <div th:if="${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+                <div th:if="!${register_STATE_STATUS}">
+                    <div th:text="${register_STATE_MESSAGE}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loginOAuth2">
+        <div class="row">
+            <div class="col-md-4">
+                <h3>Login via OAuth2</h3>
+                <div>
+                    <a th:href="${loginRedirect}">Login via Facebook</a>
+                </div>
+            </div>
+            <div th:hidden="${type ne 'fb_auth'}" class="col-md-4">
                 <div th:if="${register_STATE_STATUS}">
                     <div th:text="${register_STATE_MESSAGE}"></div>
                 </div>

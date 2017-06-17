@@ -71,8 +71,7 @@ public class AuthUserController {
   @PostMapping("/authenticateFacebookUser")
   public StringMap authenticateFacebookUser(@RequestBody StringMap credentials) throws Exception {
     return awsCognitoService.authenticateFacebookUser(
-        credentials.getString(awsProperties.getAttributeUsername()),
-        credentials.getString(awsProperties.getUserAccessToken())
+        credentials.getString(awsProperties.getFacebookAccessTokenName())
     );
   }
 

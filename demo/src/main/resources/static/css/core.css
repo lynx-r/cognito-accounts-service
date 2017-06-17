@@ -19,3 +19,11 @@ body {
 div[contenteditable] {
     border: 1px solid dodgerblue;
 }
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.margin-top10 {
+    margin-top: 10px;
+}
