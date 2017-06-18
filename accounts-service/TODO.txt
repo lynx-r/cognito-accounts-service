@@ -1,0 +1,2 @@
+Custom authorizer to check IdToken
+and request a refresh token from accounts-service.

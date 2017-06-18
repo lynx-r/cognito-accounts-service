@@ -120,12 +120,6 @@ public class AWSCognitoService {
     }
     AuthenticationResultType authenticationResult = adminInitiateAuthResult.getAuthenticationResult();
     return createStatusOk("authenticate.AUTHENTICATED", saveAuthenticationTokens(username, authenticationResult));
-
-    // If you are authenticating your users through an identity provider
-    // then you can set the Map of tokens in the request
-//    Map<String, String> logins = new HashMap<>();
-//    logins.put(awsProperties.getCognitoUserPoolName(), authenticationResult.getUserIdToken());
-//    return getCredentialsForIdentity(getIdentityId(email, logins), logins);
   }
 
   /**
