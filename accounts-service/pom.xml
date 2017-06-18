@@ -1,113 +1,143 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.workingbit</groupId>
-	<artifactId>accounts-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+    <artifactId>accounts-service</artifactId>
+    <packaging>jar</packaging>
 
-	<name>accounts-service</name>
-	<description>Demo project for Spring Boot</description>
+    <name>accounts-service</name>
+    <description>Demo project for Spring Boot</description>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.4.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
+    <parent>
+        <groupId>com.workingbit</groupId>
+        <artifactId>microservices</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+    </properties>
 
-	<dependencies>
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-rest -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-rest</artifactId>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-		</dependency>
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-rest -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-rest</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>com.amazonaws.serverless</groupId>
-			<artifactId>aws-serverless-java-container-spring</artifactId>
-			<version>LATEST</version>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-lambda-java-core</artifactId>
-			<version>1.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-cognitoidp</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-cognitoidentity</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-sts</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-java-sdk-dynamodb</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.amazonaws.serverless</groupId>
+            <artifactId>aws-serverless-java-container-spring</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cognitoidp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-cognitoidentity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-dynamodb</artifactId>
+        </dependency>
 
-		<!--OAuth-->
-		<dependency>
-			<groupId>org.apache.oltu.oauth2</groupId>
-			<artifactId>org.apache.oltu.oauth2.client</artifactId>
-			<version>1.0.1</version>
-		</dependency>
+        <!--OAuth-->
+        <dependency>
+            <groupId>org.apache.oltu.oauth2</groupId>
+            <artifactId>org.apache.oltu.oauth2.client</artifactId>
+            <version>1.0.1</version>
+        </dependency>
 
-		<!--Util-->
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.4</version>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<optional>true</optional>
-		</dependency>
+        <!--Util-->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
 
-		<!--Test-->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <!--Test-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.amazonaws</groupId>
-				<artifactId>aws-java-sdk-bom</artifactId>
-				<version>1.11.150</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.spring.platform</groupId>
+                <artifactId>platform-bom</artifactId>
+                <version>Brussels-SR3</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-bom</artifactId>
+                <version>1.11.150</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>make-bundles</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/lambda_deployment.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <!--<extensions>-->
+            <!--<extension>-->
+                <!--<groupId>org.springframework.build</groupId>-->
+                <!--<artifactId>aws-maven</artifactId>-->
+                <!--<version>5.0.0.RELEASE</version>-->
+            <!--</extension>-->
+        <!--</extensions>-->
+    </build>
 </project>

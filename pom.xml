@@ -17,13 +17,13 @@
 		<java.version>1.8</java.version>
 		<spring-cloud-services.version>1.5.0.RELEASE</spring-cloud-services.version>
 		<spring-cloud.version>Dalston.SR1</spring-cloud.version>
+		<aws-snapshot-dev.bucket>s3://com.workingbit.lambda-functions-dev/snapshot</aws-snapshot-dev.bucket>
 	</properties>
 
 	<modules>
-		<!--<module>accounts-service</module>-->
-		<!--<module>demo</module>-->
+		<module>accounts-service</module>
+		<module>demo</module>
 		<module>echo</module>
-		<module>distribution</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -80,8 +80,7 @@
 		<snapshotRepository>
 			<id>aws-snapshot-dev</id>
 			<name>AWS Snapshot Repository</name>
-			<url>s3://com.workingbit.lambda-functions-dev/snapshot</url>
+			<url>${aws-snapshot-dev.bucket}</url>
 		</snapshotRepository>
 	</distributionManagement>
-
 </project>
