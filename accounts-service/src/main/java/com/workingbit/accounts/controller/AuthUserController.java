@@ -39,9 +39,10 @@ public class AuthUserController {
    */
   @PostMapping("/registerFacebookUser")
   public StringMap registerFacebookUser(@RequestBody StringMap credentials) throws Exception {
-    return awsCognitoService.registerFacebookUser(
-        credentials.getString(awsProperties.getFacebookAccessTokenName())
-    );
+    return StringMap.emptyMap();
+//    return awsCognitoService.registerFacebookUser(
+//        credentials.getString(awsProperties.getFacebookAccessTokenName())
+//    );
   }
 
   @PostMapping("/confirmRegistration")
@@ -90,8 +91,9 @@ public class AuthUserController {
    */
   @PostMapping("/authenticateFacebookUser")
   public StringMap authenticateFacebookUser(@RequestBody StringMap credentials) throws Exception {
-    return awsCognitoService.authenticateFacebookUser(
-        credentials.getString(awsProperties.getFacebookAccessTokenName())
-    );
+    return StringMap.emptyMap();
+//    return awsCognitoService.authenticateFacebookUser(
+//        credentials.getString(awsProperties.getFacebookAccessTokenName())
+//    );
   }
 }
