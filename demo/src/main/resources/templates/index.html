@@ -24,9 +24,10 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
+                <li><a href="#description">Info</a></li>
                 <li><a href="#register">Register</a></li>
                 <li><a href="#authenticate">Authenticate</a></li>
-                <li><a href="#regOAuth2">OAuth 2</a></li>
+                <!--<li><a href="#regOAuth2">OAuth 2</a></li>-->
                 <li><a href="#testRequest">Test</a></li>
             </ul>
         </div>
@@ -34,6 +35,14 @@
     </div>
 </div>
 <div class="container">
+    <div id="description">
+        <p>
+            Implementation of API of <a href="https://aws.amazon.com/cognito/?nc1=h_ls">Cognito</a>.
+        </p>
+        <p>
+            <a href="https://github.com/lynx-r/cognito-accounts-service">Fork me</a> on Github.
+        </p>
+    </div>
     <div id="register">
         <div class="row">
             <div class="col-md-4">
@@ -138,28 +147,28 @@
         </div>
     </div>
     <hr/>
-    <div id="regOAuth2">
-        <div class="row">
-            <div class="col-md-4">
-                <h3>Register via OAuth2</h3>
-                <div>
-                    <a th:href="${registerRedirect}">Register via Facebook</a>
-                </div>
-                <h3>Login via OAuth2</h3>
-                <div>
-                    <a th:href="${loginRedirect}">Login via Facebook</a>
-                </div>
-            </div>
-            <div th:hidden="${type ne 'fb_reg'}" class="col-md-4">
-                <div th:if="${register_STATE_STATUS}">
-                    <div th:text="${register_STATE_MESSAGE}"></div>
-                </div>
-                <div th:if="!${register_STATE_STATUS}">
-                    <div th:text="${register_STATE_MESSAGE}"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!--<div id="regOAuth2">-->
+        <!--<div class="row">-->
+            <!--<div class="col-md-4">-->
+                <!--<h3>Register via OAuth2</h3>-->
+                <!--<div>-->
+                    <!--<a th:href="${registerRedirect}">Register via Facebook</a>-->
+                <!--</div>-->
+                <!--<h3>Login via OAuth2</h3>-->
+                <!--<div>-->
+                    <!--<a th:href="${loginRedirect}">Login via Facebook</a>-->
+                <!--</div>-->
+            <!--</div>-->
+            <!--<div th:hidden="${type ne 'fb_reg'}" class="col-md-4">-->
+                <!--<div th:if="${register_STATE_STATUS}">-->
+                    <!--<div th:text="${register_STATE_MESSAGE}"></div>-->
+                <!--</div>-->
+                <!--<div th:if="!${register_STATE_STATUS}">-->
+                    <!--<div th:text="${register_STATE_MESSAGE}"></div>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
     <hr/>
     <div id="testRequest">
         <div class="row">

@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
  * Time: 22:19
  */
 public class BundleOAuth {
+
   private static final ResourceBundle OA_Bundle	= ResourceBundle.getBundle("oauth");
 
   public static final String FB_CLIENT_ID = OA_Bundle.getString("FB_CLIENT_ID");
@@ -19,6 +20,9 @@ public class BundleOAuth {
   public static final String FB_API_GRAPH = OA_Bundle.getString("FB_API_GRAPH");
   public static final String FB_API_VERSION = OA_Bundle.getString("FB_API_VERSION");
   public static final String FB_API_OAUTH_PATH = OA_Bundle.getString("FB_API_OAUTH_PATH");
+  public static final String HOST = OA_Bundle.getString("HOST");
+  public static final String API_HOST = OA_Bundle.getString("API_HOST");
+  public static final String TEST_HOST = OA_Bundle.getString("TEST_HOST");
 
   public static final String ERROR_URL = OA_Bundle.getString("ERROR_URL");
 }

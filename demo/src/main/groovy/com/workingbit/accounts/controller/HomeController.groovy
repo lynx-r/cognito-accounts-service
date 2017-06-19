@@ -29,11 +29,7 @@ import javax.websocket.server.PathParam
 @Controller
 class HomeController {
 
-    static final String HOST = 'http://localhost:8080'
-    static final String API_HOST = 'https://f14p39kdw8.execute-api.us-east-1.amazonaws.com/dev'
-    static final String TEST_HOST = 'https://tgz6ve8dd5.execute-api.us-east-1.amazonaws.com/dev'
     static final String USERS = '/users'
-
     static final String REGISTER = '/register'
     static final String AUTHENTICATE = '/authenticate'
     static final String CONFIRM_REGISTRATION = '/confirmRegistration'
@@ -48,7 +44,7 @@ class HomeController {
 
     @PostMapping(value = HomeController.REGISTER, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     def register(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
-        final String uri = "${API_HOST}${USERS}${REGISTER}"
+        final String uri = "${BundleOAuth.API_HOST}${USERS}${REGISTER}"
 
         Map<String, Object> params = new HashMap<>()
         params.put('username', credentials.username[0])
@@ -63,7 +59,7 @@ class HomeController {
 
     @PostMapping(value = HomeController.CONFIRM_REGISTRATION, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     def confirmRegistration(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
-        final String uri = "${API_HOST}${USERS}${HomeController.CONFIRM_REGISTRATION}"
+        final String uri = "${BundleOAuth.API_HOST}${USERS}${HomeController.CONFIRM_REGISTRATION}"
 
         Map<String, Object> params = new HashMap<>()
         params.put('username', credentials.username[0])
@@ -77,7 +73,7 @@ class HomeController {
 
     @PostMapping(value = HomeController.RESEND_CODE, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     def resendConfirmationCode(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
-        final String uri = "${API_HOST}${USERS}${RESEND_CODE}"
+        final String uri = "${BundleOAuth.API_HOST}${USERS}${RESEND_CODE}"
 
         Map<String, Object> params = new HashMap<>()
         params.put('username', credentials.username[0])
@@ -90,7 +86,7 @@ class HomeController {
 
     @PostMapping(value = HomeController.AUTHENTICATE, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     def authenticate(@RequestBody MultiValueMap credentials, RedirectAttributes redirectAttributes) {
-        final String uri = "${API_HOST}${USERS}${AUTHENTICATE}"
+        final String uri = "${BundleOAuth.API_HOST}${USERS}${AUTHENTICATE}"
 
         Map<String, Object> params = new HashMap<>()
         params.put('username', credentials.username[0])
@@ -129,7 +125,7 @@ class HomeController {
 
             String accessToken = response.getAccessToken()
 
-            final String uri = "${API_HOST}${USERS}/registerFacebookUser"
+            final String uri = "${BundleOAuth.API_HOST}${USERS}/registerFacebookUser"
 
             Map<String, Object> params = new HashMap<>()
             params.put('facebook_access_token', accessToken)
@@ -169,7 +165,7 @@ class HomeController {
 
             String accessToken = response.getAccessToken()
 
-            final String uri = "${API_HOST}${USERS}/authenticateFacebookUser"
+            final String uri = "${BundleOAuth.API_HOST}${USERS}/authenticateFacebookUser"
 
             Map<String, Object> params = new HashMap<>()
             params.put('facebook_access_token', accessToken)
@@ -186,7 +182,7 @@ class HomeController {
 
     @PostMapping(value = '/echo', consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     def echo(@RequestBody MultiValueMap data, RedirectAttributes redirectAttributes) {
-        final String uri = "${TEST_HOST}/test/echo?echo={echo}"
+        final String uri = "${BundleOAuth.TEST_HOST}/test/echo?echo={echo}"
 
         Map<String, Object> params = new HashMap<>()
         params.put('echo', data.echo[0])
@@ -218,7 +214,7 @@ class HomeController {
                     .authorizationProvider(OAuthProviderType.FACEBOOK)
                     .setClientId(BundleOAuth.FB_CLIENT_ID)
                     .setScope(BundleOAuth.FB_SCOPE)
-                    .setRedirectURI(HOST + BundleOAuth.FB_REDIRECT_URL + typeAction)
+                    .setRedirectURI(BundleOAuth.HOST + BundleOAuth.FB_REDIRECT_URL + typeAction)
                     .setResponseType("code")
                     .setParameter("state", "123")
                     .buildQueryMessage()
