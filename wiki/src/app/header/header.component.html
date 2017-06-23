@@ -1,0 +1,42 @@
+<header>
+  <nav class="navbar navbar-toggleable-sm navbar-light bg-faded">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <a class="navbar-brand" style="cursor: pointer;"
+    >Wiki <small>shashki.online</small></a>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item" routerLinkActive="active">
+          <a class="nav-link" routerLink="/home">Главная</a>
+        </li>
+        <li class="nav-item" routerLinkActive="active">
+          <a class="nav-link" routerLink="/articles">Статьи</a>
+        </li>
+        <li class="nav-item" routerLinkActive="active">
+          <a class="nav-link" routerLink="/pricing">Предложения</a>
+        </li>
+        <li [hidden]="isLoggedIn" class="nav-item" routerLinkActive="active">
+          <a class="nav-link" routerLink="/participate">Участие</a>
+        </li>
+        <li [hidden]="!isLoggedIn" class="nav-item" routerLinkActive="active">
+          <a class="nav-link" routerLink="/editor">Написать статью</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav">
+        <li [hidden]="isLoggedIn" class="nav-item">
+          <a class="nav-link" routerLink="/passport">Войти <small>или зарегистрироваться</small></a>
+        </li>
+        <li *ngIf="isLoggedIn" class="nav-item">
+          <a class="nav-link" [routerLink]="['settings']">{{user.name}}</a>
+        </li>
+        <li [hidden]="!isLoggedIn" class="nav-item">
+          <a class="nav-link" [routerLink]="['passport']" [queryParams]="{logout: true}">Выход</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>

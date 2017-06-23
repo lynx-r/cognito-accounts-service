@@ -1,0 +1,8 @@
+<div #draughtRef
+     [ngStyle]="{'width': size + 'px', 'height': size + 'px', 'color': black ? 'black' : 'white'}"
+     [ngClass]="{
+     'selected': selected,
+     'draught': !queen,
+     'draught-queen': queen}">
+  <div *ngIf="queen" class="queen" [ngStyle]="{'color': black ? 'black' : 'white'}">Q</div>
+</div>

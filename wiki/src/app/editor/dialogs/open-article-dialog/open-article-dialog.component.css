@@ -1,0 +1,11 @@
+.articles {
+  text-decoration: none;
+}
+
+.article {
+  list-style-type: none;
+}
+
+.selected {
+  text-decoration: underline;
+}

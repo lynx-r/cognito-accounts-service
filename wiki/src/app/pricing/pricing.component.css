@@ -1,0 +1,13 @@
+.head {
+  text-align: center;
+  font-size: 40px;
+  margin-bottom: 70px;
+}
+.price {
+  text-align: center;
+  font-size: 60px;
+  margin-bottom: 70px;
+}
+.reader {
+  border-left: 1px #e6e6e6 solid;
+}

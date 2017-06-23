@@ -1,0 +1,105 @@
+<div class="board-toolbar">
+  <div class="btn-group">
+    <div>
+      <button class="create-article btn btn-secondary" data-toggle="modal" data-target="#createArticle">
+        <i class="fa fa-file"></i>
+      </button>
+      <!--<label for="initBoard">Новая доска</label>-->
+    </div>
+    <div [hidden]="article">
+      <button class="btn btn-secondary" (click)="findArticles()" data-toggle="modal"
+              data-target="#openArticle">
+        <i class="fa fa-folder-open"></i>
+      </button>
+      <!--<label for="loadBoard">Загрузить</label>-->
+    </div>
+    <div [hidden]="!article" class="btn-group">
+      <div>
+        <button (click)="updateArticle()" id="saveBoard" class="btn btn-secondary">
+          <i class="fa fa-save"></i>
+        </button>
+        <!--<label for="saveBoard">Сохранить</label>-->
+      </div>
+      <div>
+        <button id="open-article" class="btn btn-secondary" (click)="findArticles()" data-toggle="modal"
+                data-target="#openArticle">
+          <i class="fa fa-folder-open"></i>
+        </button>
+        <!--<label for="loadBoard">Загрузить</label>-->
+      </div>
+      <div>
+        <button (click)="eraseBoard()" id="clearBoard" class="btn btn-secondary">
+          <i class="fa fa-eraser"></i>
+        </button>
+        <!--<label for="clearBoard">Очистить</label>-->
+      </div>
+      <div>
+        <button (click)="fillInitBoard()" id="fillInitBoard" class="btn btn-secondary">
+          <i class="fa fa-file-excel-o"></i>
+        </button>
+        <!--<label for="clearBoard">Очистить</label>-->
+      </div>
+      <div id="toggleEdit">
+        <div class="">
+          <button class="btn btn-primary" (click)="onToggleEditMode()" [hidden]="editMode"><i class="fa fa-edit"></i>
+          </button>
+          <button class="btn btn-danger" (click)="onToggleEditMode()" [hidden]="!editMode"><i class="fa fa-edit"></i>
+          </button>
+        </div>
+        <!--<label for="toggle-edit" class="form-control-label">Редактирование</label>-->
+      </div>
+      <div id="draughtsToAdd" [hidden]="!editMode">
+      <span #selectColor (click)="addBlack=false" class="float-left">
+        <span (click)="onDraughtSelected(false,false)" class="float-left">
+          <draught-edit [queen]="false" [selected]="!addQueen && !addBlack && !removeDraught"
+                        [black]="false"></draught-edit>
+        </span>
+        <span (click)="onDraughtSelected(false,true)" class="float-left">
+          <draught-edit [queen]="true" [selected]="addQueen && !addBlack && !removeDraught"
+                        [black]="false"></draught-edit>
+        </span>
+      </span>
+        <span #selectType (click)="addBlack=true" class="float-left">
+        <span (click)="onDraughtSelected(true,false)" class="float-left">
+          <draught-edit [queen]="false" [selected]="!addQueen && addBlack && !removeDraught"
+                        [black]="true"></draught-edit>
+        </span>
+        <span (click)="onDraughtSelected(true,true)" class="float-left">
+          <draught-edit [queen]="true" [selected]="addQueen && addBlack && !removeDraught"
+                        [black]="true"></draught-edit>
+        </span>
+      </span>
+        <span>
+          <a [ngClass]="{'selected-remove': removeDraught}" (click)="onRemoveDraught()" class="remove-draught"></a>
+        </span>
+      </div>
+      <div [hidden]="editMode">
+        <div id="undoMove" class="">
+          <button class="btn btn-secondary">
+            <i class="fa fa-undo"></i>
+          </button>
+        </div>
+        <!--<label for="toggle-edit" class="form-control-label">Редактирование</label>-->
+      </div>
+      <div id="redoMove" [hidden]="editMode" class="">
+        <button class="btn btn-secondary">
+          <i class="fa fa-rotate-right"></i>
+        </button>
+      </div>
+      <div id="linkOnPosition" class="" [hidden]="editMode">
+        <button class="btn btn-secondary">
+          <i class="fa fa-link"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="float-right">
+    <button (click)="removeArticle()" [disabled]="!article" id="removeBoard" class="btn btn-danger" data-toggle="modal" data-target="#initBoardModal">
+      <i class="fa fa-remove"></i>
+    </button>
+    <!--<label for="clearBoard">Очистить</label>-->
+  </div>
+
+  <create-article-dialog></create-article-dialog>
+  <open-article-dialog [observableArticles]="observableArticles"></open-article-dialog>
+</div>

@@ -1,0 +1,8 @@
+<div class="wiki-articles">
+  <div *ngFor="let article of articles | async" class="article row">
+    <div class="col-8">
+      <a>{{article.title}}</a>
+    </div>
+    <div class="col-4">{{article.author}}</div>
+  </div>
+</div>

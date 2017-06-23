@@ -1,0 +1,64 @@
+.draught {
+  position: relative;
+  z-index: 1;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  border-radius: 100%;
+  border: 4px solid;
+  -webkit-box-shadow: 1px 1px 10px 0 black;
+  -moz-box-shadow: 1px 1px 10px 0 black;
+  box-shadow: 1px 1px 10px 0 black;
+}
+
+.draught:before {
+  border: 4px solid;
+  content: '';
+  position: relative;
+  display: block;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  border-radius: 100%;
+}
+
+.draught:after {
+  border: 4px solid;
+  content: '';
+  position: absolute;
+  display: block;
+  top: 30%;
+  left: 30%;
+  width: 40%;
+  height: 40%;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  border-radius: 100%;
+}
+
+.highlight {
+  background-color: red;
+}
+
+.draught-queen {
+  border: 4px solid;
+  z-index: 10;
+  position: relative;
+  -webkit-box-shadow: 1px 1px 10px 0 black;
+  -moz-box-shadow: 1px 1px 10px 0 black;
+  box-shadow: 1px 1px 10px 0 black;
+  -webkit-border-radius: 100%;
+  -moz-border-radius: 100%;
+  border-radius: 100%;
+}
+
+.queen {
+  top: -2px;
+  left: 10px;
+  position: absolute;
+  font-family: "Courier New", serif;
+  font-size: 30px;
+  z-index: 1000;
+}

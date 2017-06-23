@@ -1,0 +1,12 @@
+<div>
+  <table class="board">
+    <tr *ngFor="let chunk of boardChunk" class="board-row">
+      <td *ngFor="let i of chunk" class="board-coll">
+        <square [square]="board.board[i]" class="float-left">
+          <draught *ngIf="board.board[i].draught != null" [playsBlack]="board.black" [square]="board.board[i]"></draught>
+        </square>
+      </td>
+    </tr>
+  </table>
+</div>
+

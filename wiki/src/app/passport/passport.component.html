@@ -1,0 +1,47 @@
+<div class="row passport">
+  <div class="col-4">
+    <h4>Я хочу войти через социальную сеть</h4>
+    <div class="row" style="margin-top: 40px;">
+      <div class="col-3">
+        <i class="fa fa-vk fa-3x"></i>
+      </div>
+      <div class="col-3">
+        <i class="fa fa-facebook fa-3x"></i>
+      </div>
+      <div class="col-3">
+        <i class="fa fa-twitter fa-3x"></i>
+      </div>
+      <div class="col-3">
+        <i class="fa fa-google fa-3x"></i>
+      </div>
+    </div>
+  </div>
+  <div class="col-4">
+    <h4>Я уже зарегистрирован</h4>
+    <div class="form-group">
+      <label for="username" class="form-control-label">Имя пользователя или email</label>
+      <input #email id="username" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="password" class="form-control-label">Пароль</label>
+      <input type="password" #password id="password" class="form-control">
+    </div>
+    <button (click)="onLogin(email, password)" class="btn btn-primary float-right">Войти</button>
+  </div>
+  <div class="col-4">
+    <h4>Я новый пользователь</h4>
+    <div class="form-group">
+      <label for="name" class="form-control-label">Имя</label>
+      <input #nameNew id="name" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="emailNew" class="form-control-label">Email</label>
+      <input #emailNew id="emailNew" class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="passwordNew" class="form-control-label">Пароль</label>
+      <input type="password" #passwordNew id="passwordNew" class="form-control">
+    </div>
+    <button (click)="onSignUp(nameNew, emailNew, passwordNew)" class="btn btn-success float-right">Зарегистрироваться</button>
+  </div>
+</div>

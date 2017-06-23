@@ -1,0 +1,25 @@
+.square {
+  position: relative;
+  /*z-index: 0;*/
+}
+
+.square-black:hover {
+  background-color: rgba(150, 150, 150, .7);
+}
+
+.highlight {
+  background-color: rgba(50, 150, 150, .6) !important;
+}
+
+.square-black {
+  background-color: rgba(150, 150, 150, .8);
+}
+
+.square-white {
+  background-color: white;
+}
+
+.draught-in-square {
+  position: absolute;
+  z-index: 1000;
+}

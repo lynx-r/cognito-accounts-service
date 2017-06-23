@@ -1,0 +1,11 @@
+<!--{{'b ' + draught.beaten}}-->
+<div #draughtRef
+     *ngIf="!draught?.beaten"
+     [ngStyle]="{'width': size + 'px', 'height': size + 'px', 'color': draught?.black ? 'black' : 'white'}"
+     [ngClass]="{
+     'highlight': draught?.highlighted,
+     'draught': !draught?.queen,
+     'draught-queen': draught?.queen}"
+     (click)="onDraughtClick()">
+  <div *ngIf="draught?.queen" class="queen" [ngStyle]="{'color': draught?.black ? 'black' : 'white'}">Q</div>
+</div>

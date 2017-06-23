@@ -1,0 +1,6 @@
+export enum EnumRules {
+  RUSSIAN = 8,
+  RUSSIAN_GIVEAWAY = -8,
+  INTERNATIONAL = 10,
+  INTERNATIONAL_GIVEAWAY = -10
+}
