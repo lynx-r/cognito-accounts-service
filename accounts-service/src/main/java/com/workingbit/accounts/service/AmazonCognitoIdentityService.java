@@ -140,7 +140,7 @@ public class AmazonCognitoIdentityService {
     Date sessionCredentialsExpiration = stsCredentials.getExpiration();
     return sessionCredentials.getSessionToken();
 // these credentials can then be used to initialize other AWS clients,
-// for example the Amazon Cognito Sync client
+// for workingbit the Amazon Cognito Sync client
 //    AmazonCognitoSync syncClient = new AmazonCognitoSyncClient(sessionCredentials);
 //    ListDatasetsRequest syncRequest = new ListDatasetsRequest();
 //    syncRequest.setIdentityId(idResp.getIdentityId());

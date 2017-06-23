@@ -23,7 +23,9 @@
 	<modules>
 		<module>accounts-service</module>
 		<module>echo</module>
-	</modules>
+		<module>echospark</module>
+		<module>echojersey</module>
+    </modules>
 	<dependencyManagement>
 		<dependencies>
 		</dependencies>
@@ -44,6 +46,31 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!--<plugin>-->
+				<!--<groupId>com.cleanenergyexperts</groupId>-->
+				<!--<artifactId>maven-cloudformation-plugin</artifactId>-->
+				<!--<version>0.0.4</version>-->
+				<!--<configuration>-->
+					<!--<accessKey>AKIAJ3ROI76XGOMLZH3Q</accessKey>-->
+					<!--<secretKey>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</secretKey>-->
+					<!--<bucketName>${aws-snapshot-dev.bucket}</bucketName>-->
+					<!--<region>eu-west-1</region>-->
+					<!--<stackName>MyCognitoTest</stackName>-->
+					<!--<artifactFile>${project.build.directory}/${maven.build.timestamp}-${project.build.finalName}.zip</artifactFile>-->
+					<!--&lt;!&ndash;<stackParameters>&ndash;&gt;-->
+						<!--&lt;!&ndash;<Key>[Any Parameters here will be feed into the Cloud Formation Stack Template]</Key>&ndash;&gt;-->
+					<!--&lt;!&ndash;</stackParameters>&ndash;&gt;-->
+				<!--</configuration>-->
+				<!--<executions>-->
+					<!--<execution>-->
+						<!--<id>cf-deploy</id>-->
+						<!--<phase>deploy</phase>-->
+						<!--<goals>-->
+							<!--<goal>update-cf</goal>-->
+						<!--</goals>-->
+					<!--</execution>-->
+				<!--</executions>-->
+			<!--</plugin>-->
 			<!--<plugin>-->
 				<!--&lt;!&ndash;  Note: Normally, this plugin would be run using-->
                 <!--"mvn compile assembly:single" but the execution-->
@@ -74,7 +101,13 @@
 			</extension>
 		</extensions>
 	</build>
-
+	<repositories>
+		<repository>
+			<id>maven.leadoperations.co-release</id>
+			<name>AWS S3 Release Repository</name>
+			<url>http://maven.leadoperations.co/release</url>
+		</repository>
+	</repositories>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>aws-snapshot-dev</id>
